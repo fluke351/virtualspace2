@@ -29,6 +29,7 @@ wss.on('connection', (ws) => {
         case 'join':
           // New player joins
           playerId = String(nextPlayerId++);
+          ws.playerId = playerId;  // Store playerId on WebSocket for relay purposes
           playerData = {
             id: playerId,
             name: data.name,
@@ -74,8 +75,8 @@ wss.on('connection', (ws) => {
               name: playerData.name,
               color: playerData.color,
               text: data.text,
-              type: data.type || 'normal',
-              msgType: data.type || 'normal', // backwards compatibility
+              type: data.msgType || 'normal',
+              msgType: data.msgType || 'normal', // backwards compatibility
             };
             chatHistory.push(msg);
             broadcast({ type: 'chat', msg: msg }, ws);
@@ -97,6 +98,30 @@ wss.on('connection', (ws) => {
         case 'spotlight':
           if (playerData) {
             broadcast({ type: 'spotlight', id: playerId }, ws);
+          }
+          break;
+
+        case 'sdp':
+          // Relay SDP offer/answer to target peer
+          if (data.to && data.sdp) {
+            const targetWs = Array.from(wss.clients).find(
+              client => client.playerId === data.to && client.readyState === WebSocket.OPEN
+            );
+            if (targetWs) {
+              targetWs.send(JSON.stringify({ type: 'sdp', from: playerId, sdp: data.sdp }));
+            }
+          }
+          break;
+
+        case 'ice':
+          // Relay ICE candidate to target peer
+          if (data.to && data.candidate) {
+            const targetWs = Array.from(wss.clients).find(
+              client => client.playerId === data.to && client.readyState === WebSocket.OPEN
+            );
+            if (targetWs) {
+              targetWs.send(JSON.stringify({ type: 'ice', from: playerId, candidate: data.candidate }));
+            }
           }
           break;
       }

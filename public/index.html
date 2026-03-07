@@ -220,6 +220,97 @@ let ws = null;
 let myId = null, myName = '', myColor = '#00ffcc';
 let otherPlayers = {};
 
+// ══════════════════════════════════════════════
+// AUDIO + WebRTC
+// ══════════════════════════════════════════════
+let myStream = null;
+let audioContext = null;
+let peerConnections = {};
+let audioElements = {};
+const ICE_SERVERS = [
+  { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }
+];
+
+async function initAudio() {
+  try {
+    myStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  } catch (err) {
+    console.log('Audio access denied:', err);
+  }
+}
+
+async function createPeerConnection(remoteId) {
+  const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+  
+  if (myStream) {
+    myStream.getTracks().forEach(track => pc.addTrack(track, myStream));
+  }
+  
+  pc.ontrack = (event) => {
+    if (!audioElements[remoteId]) {
+      const audio = new Audio();
+      audio.autoplay = true;
+      audio.playsinline = true;
+      audioElements[remoteId] = audio;
+    }
+    audioElements[remoteId].srcObject = event.streams[0];
+  };
+  
+  pc.onicecandidate = (event) => {
+    if (event.candidate) {
+      wsSend({ type: 'ice', to: remoteId, candidate: event.candidate });
+    }
+  };
+  
+  pc.onconnectionstatechange = () => {
+    if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
+      pc.close();
+      delete peerConnections[remoteId];
+      if (audioElements[remoteId]) {
+        audioElements[remoteId].srcObject = null;
+        delete audioElements[remoteId];
+      }
+    }
+  };
+  
+  peerConnections[remoteId] = pc;
+  return pc;
+}
+
+async function sendOffer(remoteId) {
+  const pc = await createPeerConnection(remoteId);
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  wsSend({ type: 'sdp', to: remoteId, sdp: pc.localDescription });
+}
+
+async function handleSDP(from, sdp) {
+  let pc = peerConnections[from];
+  if (!pc) {
+    pc = await createPeerConnection(from);
+  }
+  
+  await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+  
+  if (sdp.type === 'offer') {
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    wsSend({ type: 'sdp', to: from, sdp: pc.localDescription });
+  }
+}
+
+async function handleICE(from, candidate) {
+  const pc = peerConnections[from];
+  if (pc) {
+    try {
+      await pc.addIceCandidate(new RTCIceCandidate(candidate));
+    } catch (err) {
+      console.log('ICE error:', err);
+    }
+  }
+}
+
 // Color picker
 document.querySelectorAll('.color-opt').forEach(el => {
   el.addEventListener('click', () => {
@@ -247,6 +338,7 @@ function joinGame() {
   ws = new WebSocket(`${proto}://${location.host}`);
 
   ws.onopen = () => {
+    initAudio();
     ws.send(JSON.stringify({ type:'join', name:myName, color:myColor, x:player.x, y:player.y }));
   };
   ws.onerror = () => { st.textContent = 'เชื่อมต่อไม่ได้ กรุณาลองใหม่'; st.className = 'status-msg err'; };
@@ -274,6 +366,7 @@ function handleMessage(e) {
 
     case 'player_join':
       otherPlayers[data.id] = data.player;
+      sendOffer(data.id);
       updatePlayerList();
       break;
 
@@ -305,6 +398,14 @@ function handleMessage(e) {
 
     case 'spotlight':
       showToast(`📢 ${otherPlayers[data.id]?.name || '?'} กำลัง Broadcast!`);
+      break;
+
+    case 'sdp':
+      handleSDP(data.from, data.sdp);
+      break;
+
+    case 'ice':
+      handleICE(data.from, data.candidate);
       break;
   }
 }
@@ -567,7 +668,7 @@ function tryInteract(){
 function sendChat(){
   const inp=document.getElementById('chat-input');
   const text=inp.value.trim(); if(!text) return;
-  wsSend({type:'chat', text, msgType:privateZone?'priv':'other'});
+  wsSend({type:'chat', text, msgType:privateZone?'priv':'normal'});
   inp.value='';
 }
 document.getElementById('chat-input').addEventListener('keydown',e=>{ if(e.key==='Enter'){sendChat();e.preventDefault();} });
