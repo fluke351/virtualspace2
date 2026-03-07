@@ -14,6 +14,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 let players = {};
 let chatHistory = [];
 let wbStrokes = [];
+let currentVideoId = null;
 let nextPlayerId = 1;
 
 // WebSocket connection handler
@@ -49,6 +50,7 @@ wss.on('connection', (ws) => {
               players: players,
               chatHistory: chatHistory,
               wbStrokes: wbStrokes,
+              currentVideoId: currentVideoId,
             })
           );
 
@@ -65,6 +67,8 @@ wss.on('connection', (ws) => {
             playerData.y = data.y;
             playerData.dir = data.dir;
             playerData.frame = data.frame;
+            // Add ID to the broadcast message so clients know who moved
+            data.id = playerId;
             broadcast(data, ws);
           }
           break;
@@ -79,6 +83,7 @@ wss.on('connection', (ws) => {
               msgType: data.msgType || 'normal', // backwards compatibility
             };
             chatHistory.push(msg);
+            if (chatHistory.length > 50) chatHistory.shift();
             broadcast({ type: 'chat', msg: msg }, ws);
           }
           break;
@@ -93,6 +98,11 @@ wss.on('connection', (ws) => {
         case 'wb_clear':
           wbStrokes = [];
           broadcast({ type: 'wb_clear' }, ws);
+          break;
+
+        case 'yt_change':
+          currentVideoId = data.videoId;
+          broadcast(data, ws);
           break;
 
         case 'spotlight':

@@ -189,6 +189,19 @@ body { background:#0f0f1e; font-family:'Segoe UI',sans-serif; overflow:hidden; h
     </div>
   </div>
 
+  <!-- YouTube -->
+  <div class="popup" id="popup-yt" style="top:8px;left:50%;transform:translateX(-50%);width:480px;">
+    <button class="popup-close" onclick="closeYoutube()">✕</button>
+    <h3 style="color:#ff4444;">📺 YouTube Player</h3>
+    <div style="margin-bottom:10px;display:flex;gap:8px;">
+      <input type="text" id="yt-url" placeholder="วางลิงก์ YouTube ที่นี่..." style="flex:1;background:#0f0f1e;border:1px solid #2a2a50;color:#e8e8ff;padding:6px;border-radius:2px;">
+      <button onclick="changeYoutube()" style="background:#ff4444;color:white;border:none;padding:6px 12px;cursor:pointer;border-radius:2px;">Play</button>
+    </div>
+    <div id="yt-frame-container" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;background:#000;">
+      <iframe id="yt-iframe" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
+  </div>
+
   <!-- Chat -->
   <div id="chat-panel">
     <div id="chat-msgs"></div>
@@ -354,18 +367,28 @@ function handleMessage(e) {
       myId = data.id;
       // Load existing players
       Object.entries(data.players).forEach(([id, p]) => {
-        if (id !== myId) otherPlayers[id] = p;
+        if (id !== myId) {
+          otherPlayers[id] = p;
+          otherPlayers[id].targetX = p.x;
+          otherPlayers[id].targetY = p.y;
+        }
       });
       // Load chat
       data.chatHistory.forEach(m => addChatEl(m.name, m.text, m.type || m.msgType, m.color));
       // Load whiteboard
       data.wbStrokes.forEach(s => drawStroke(s));
+      // Load YouTube if playing
+      if (data.currentVideoId) {
+        playYoutube(data.currentVideoId);
+      }
       // Show game
       startGame();
       break;
 
     case 'player_join':
       otherPlayers[data.id] = data.player;
+      otherPlayers[data.id].targetX = data.player.x;
+      otherPlayers[data.id].targetY = data.player.y;
       sendOffer(data.id);
       updatePlayerList();
       break;
@@ -377,8 +400,8 @@ function handleMessage(e) {
 
     case 'move':
       if (otherPlayers[data.id]) {
-        otherPlayers[data.id].x = data.x;
-        otherPlayers[data.id].y = data.y;
+        otherPlayers[data.id].targetX = data.x;
+        otherPlayers[data.id].targetY = data.y;
         otherPlayers[data.id].dir = data.dir;
         otherPlayers[data.id].frame = data.frame;
       }
@@ -394,6 +417,10 @@ function handleMessage(e) {
 
     case 'wb_clear':
       clearWBLocal();
+      break;
+
+    case 'yt_change':
+      playYoutube(data.videoId);
       break;
 
     case 'spotlight':
@@ -440,6 +467,7 @@ MAP[2][35]=4;
 
 const OBJECTS=[
   {id:'wb',  x:15*TILE,y:6*TILE, w:3*TILE,h:2*TILE,label:'Whiteboard',emoji:'📋',color:'#3c7be8',action:'whiteboard'},
+  {id:'yt',  x:8*TILE, y:6*TILE, w:3*TILE,h:2*TILE,label:'YouTube',   emoji:'📺',color:'#ff4444',action:'youtube'},
   {id:'chat',x:3*TILE, y:21*TILE,w:3*TILE,h:2*TILE,label:'Chat',      emoji:'💬',color:'#00ffcc',action:'chat'},
   {id:'spot',x:34*TILE,y:1*TILE, w:2*TILE,h:2*TILE,label:'Spotlight', emoji:'📢',color:'#ffe066',action:'spotlight'},
 ];
@@ -505,6 +533,14 @@ function drawBubble(x,y,text){
 // LOOP
 // ══════════════════════════════════════════════
 function update(){
+  // Interpolation for smooth movement
+  Object.values(otherPlayers).forEach(p => {
+    if (p.targetX !== undefined) {
+      p.x += (p.targetX - p.x) * 0.2;
+      p.y += (p.targetY - p.y) * 0.2;
+    }
+  });
+
   let dx=0,dy=0;
   if(keys['w']||keys['W']||keys['ArrowUp'])    dy=-player.speed;
   if(keys['s']||keys['S']||keys['ArrowDown'])  dy= player.speed;
@@ -531,9 +567,9 @@ function update(){
   document.getElementById('chip-priv').className='chip'+(privateZone?' on':'');
   document.getElementById('chip-spot').className='chip'+(spotlightActive?' on':'');
 
-  // Send position every 3 frames
+  // Send position every 2 frames
   dbTick++;
-  if(dbTick>=3){ dbTick=0; wsSend({type:'move',x:player.x,y:player.y,dir:player.dir,frame:player.frame}); }
+  if(dbTick>=2){ dbTick=0; wsSend({type:'move',x:player.x,y:player.y,dir:player.dir,frame:player.frame}); }
 }
 
 function draw(){
@@ -578,9 +614,35 @@ function draw(){
 
   // Other players
   const now=Date.now();
-  Object.values(otherPlayers).forEach(p=>{
+  // My Zone
+  const myR=Math.floor(player.y/TILE), myC=Math.floor(player.x/TILE);
+  const meInPriv=(myR>=6&&myR<13&&myC>=16&&myC<22);
+
+  Object.entries(otherPlayers).forEach(([id,p])=>{
     const dist=Math.hypot(player.x-p.x,player.y-p.y);
-    const vol=Math.max(0,1-dist/(TILE*5));
+    let vol=Math.max(0,1-dist/(TILE*5));
+    
+    const pR=Math.floor(p.y/TILE), pC=Math.floor(p.x/TILE);
+    const pInPriv=(pR>=6&&pR<13&&pC>=16&&pC<22);
+    const pOnSpot=(pR<=3&&pC>=34&&pC<=36);
+
+    // Logic: Spotlight overrides everything. Otherwise, Private Zone isolation.
+    if (pOnSpot) {
+      vol = 1;
+      // Visual indicator for broadcasting
+      ctx.save();
+      ctx.font = '14px Segoe UI';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ffe066';
+      ctx.fillText('📢 Broadcasting', p.x, p.y - 55);
+      ctx.restore();
+    } else if (meInPriv !== pInPriv) {
+      vol = 0;
+    }
+
+    // Apply volume to audio element
+    if(audioElements[id]) audioElements[id].volume = vol;
+
     drawChar(p.x,p.y,p.color,p.name,p.frame||0,p.dir||2,false,vol);
     if(p.bubble&&now<p.bubbleExp) drawBubble(p.x,p.y,p.bubble);
     if(vol>0.05){
@@ -591,6 +653,15 @@ function draw(){
   });
 
   // Me
+  const amIOnSpot=(myR<=3&&myC>=34&&myC<=36);
+  if(amIOnSpot) {
+    ctx.save();
+    ctx.font = '14px Segoe UI';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffe066';
+    ctx.fillText('📢 You are Broadcasting', player.x, player.y - 55);
+    ctx.restore();
+  }
   drawChar(player.x,player.y,myColor,myName+'(คุณ)',player.frame,player.dir,true);
   ctx.restore();
 
@@ -654,6 +725,7 @@ function tryInteract(){
     const dist=Math.hypot(player.x-(obj.x+obj.w/2),player.y-(obj.y+obj.h/2));
     if(dist<TILE*3){
       if(obj.action==='whiteboard') openPopup('popup-wb');
+      else if(obj.action==='youtube') openPopup('popup-yt');
       else if(obj.action==='chat') document.getElementById('chat-input').focus();
       else if(obj.action==='spotlight') showToast('📢 เดินไปที่กระเบื้องสีเหลืองมุมขวาบน!');
       return;
@@ -711,6 +783,38 @@ document.getElementById('brush-size').addEventListener('input',e=>wbSize=+e.targ
 document.querySelectorAll('.wb-color').forEach(el=>{
   el.addEventListener('click',()=>{ document.querySelectorAll('.wb-color').forEach(e=>e.classList.remove('sel')); el.classList.add('sel'); wbColor=el.dataset.c; });
 });
+
+// ══════════════════════════════════════════════
+// YOUTUBE
+// ══════════════════════════════════════════════
+function changeYoutube() {
+  const url = document.getElementById('yt-url').value;
+  const videoId = extractVideoId(url);
+  if (videoId) {
+    wsSend({ type: 'yt_change', videoId: videoId });
+    playYoutube(videoId);
+  } else {
+    showToast('❌ ลิงก์ YouTube ไม่ถูกต้อง');
+  }
+}
+
+function playYoutube(videoId) {
+  const iframe = document.getElementById('yt-iframe');
+  iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+  openPopup('popup-yt');
+}
+
+function closeYoutube() {
+  const iframe = document.getElementById('yt-iframe');
+  iframe.src = '';
+  closePopup('popup-yt');
+}
+
+function extractVideoId(url) {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
 
 // ══════════════════════════════════════════════
 // UTILS
