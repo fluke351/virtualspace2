@@ -1,1 +1,16 @@
-# virtualspace2
+{
+  "name": "virtual-space-online",
+  "version": "2.0.0",
+  "description": "Multiplayer Virtual Space — No Firebase needed",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.16.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
