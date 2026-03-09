@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Virtual Space</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -33,6 +33,39 @@ body { background:#0f0f1e; font-family:'Segoe UI',sans-serif; overflow:hidden; h
   border:3px solid transparent; transition:.15s; flex-shrink:0;
 }
 .color-opt.sel { border-color:#fff; transform:scale(1.15); }
+.acc-row { display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap; }
+.acc-opt {
+  width:40px; height:40px; border-radius:8px; cursor:pointer;
+  border:2px solid #2a2a50; background:#1a1a35; display:flex;
+  align-items:center; justify-content:center; font-size:20px;
+  transition:.15s;
+}
+.acc-opt:hover { background:#2a2a50; }
+.acc-opt.sel { border-color:#00ffcc; background:#2a2a50; transform:scale(1.1); }
+.hair-row { display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap; }
+.hair-opt {
+  width:40px; height:40px; border-radius:8px; cursor:pointer;
+  border:2px solid #2a2a50; background:#1a1a35; display:flex;
+  align-items:center; justify-content:center; font-size:20px;
+  transition:.15s;
+}
+.hair-opt:hover { background:#2a2a50; }
+.hair-opt.sel { border-color:#00ffcc; background:#2a2a50; transform:scale(1.1); }
+.gender-row { display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap; }
+.gender-opt {
+  width:40px; height:40px; border-radius:8px; cursor:pointer;
+  border:2px solid #2a2a50; background:#1a1a35; display:flex;
+  align-items:center; justify-content:center; font-size:20px;
+  transition:.15s;
+}
+.gender-opt:hover { background:#2a2a50; }
+.gender-opt.sel { border-color:#00ffcc; background:#2a2a50; transform:scale(1.1); }
+.haircolor-row { display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap; }
+.haircolor-opt {
+  width:30px; height:30px; border-radius:50%; cursor:pointer;
+  border:3px solid transparent; transition:.15s; flex-shrink:0;
+}
+.haircolor-opt.sel { border-color:#fff; transform:scale(1.15); }
 .btn-join {
   width:100%; padding:13px; background:#00ffcc; color:#0f0f1e;
   font-size:14px; font-weight:700; border:none; cursor:pointer;
@@ -141,6 +174,11 @@ body { background:#0f0f1e; font-family:'Segoe UI',sans-serif; overflow:hidden; h
     <p>เข้าร่วมพื้นที่ออนไลน์กับทุกคน — ไม่ต้องสมัครสมาชิก</p>
     <div class="field-label">ชื่อผู้เล่น</div>
     <input class="setup-input" id="inp-name" type="text" placeholder="กรอกชื่อของคุณ..." maxlength="16">
+    <div class="field-label">เพศ</div>
+    <div class="gender-row">
+      <div class="gender-opt sel" data-gender="male">👨</div>
+      <div class="gender-opt" data-gender="female">👩</div>
+    </div>
     <div class="field-label">สีตัวละคร</div>
     <div class="color-row">
       <div class="color-opt sel" style="background:#00ffcc" data-c="#00ffcc"></div>
@@ -150,6 +188,34 @@ body { background:#0f0f1e; font-family:'Segoe UI',sans-serif; overflow:hidden; h
       <div class="color-opt" style="background:#ff9966" data-c="#ff9966"></div>
       <div class="color-opt" style="background:#c084fc" data-c="#c084fc"></div>
       <div class="color-opt" style="background:#4ade80" data-c="#4ade80"></div>
+    </div>
+    <div class="field-label">เครื่องประดับ</div>
+    <div class="acc-row">
+      <div class="acc-opt sel" data-acc="none">❌</div>
+      <div class="acc-opt" data-acc="hat">🎩</div>
+      <div class="acc-opt" data-acc="glasses">👓</div>
+      <div class="acc-opt" data-acc="headphones">🎧</div>
+      <div class="acc-opt" data-acc="crown">👑</div>
+      <div class="acc-opt" data-acc="mask">😷</div>
+    </div>
+    <div class="field-label">ทรงผม</div>
+    <div class="hair-row">
+      <div class="hair-opt sel" data-hair="none">👨‍🦲</div>
+      <div class="hair-opt" data-hair="short">💇</div>
+      <div class="hair-opt" data-hair="long">👩</div>
+      <div class="hair-opt" data-hair="mohawk">🧑‍🎤</div>
+      <div class="hair-opt" data-hair="afro">🧑‍🦱</div>
+    </div>
+    <div class="field-label">สีผม</div>
+    <div class="haircolor-row">
+      <div class="haircolor-opt sel" style="background:#2c2c2c" data-hc="#2c2c2c"></div>
+      <div class="haircolor-opt" style="background:#6b4423" data-hc="#6b4423"></div>
+      <div class="haircolor-opt" style="background:#d2b48c" data-hc="#d2b48c"></div>
+      <div class="haircolor-opt" style="background:#c2410c" data-hc="#c2410c"></div>
+      <div class="haircolor-opt" style="background:#2563eb" data-hc="#2563eb"></div>
+      <div class="haircolor-opt" style="background:#db2777" data-hc="#db2777"></div>
+      <div class="haircolor-opt" style="background:#7c3aed" data-hc="#7c3aed"></div>
+      <div class="haircolor-opt" style="background:#9ca3af" data-hc="#9ca3af"></div>
     </div>
     <button class="btn-join" onclick="joinGame()">เข้าร่วม →</button>
     <div class="status-msg" id="conn-status"></div>
@@ -161,9 +227,9 @@ body { background:#0f0f1e; font-family:'Segoe UI',sans-serif; overflow:hidden; h
   <span class="logo">◉ VIRTUAL SPACE</span>
   <div id="player-label"></div>
   <div id="online-count"><div class="pulse"></div><span id="online-num">1</span> ออนไลน์</div>
-  <div id="status-row">
-    <div class="chip" id="chip-near" style="--cc:#00ffcc">● ใกล้คนอื่น</div>
-    <div class="chip" id="chip-priv" style="--cc:#ff6ec7">● Private Zone</div>
+    <div id="status-row">
+      <div class="chip" id="chip-near" style="--cc:#00ffcc">● ใกล้คนอื่น</div>
+      <div class="chip" id="chip-priv" style="--cc:#ff6ec7">● Private Zone</div>
     <div class="chip" id="chip-spot" style="--cc:#ffe066">● Spotlight</div>
     <button id="btn-leave" onclick="leaveGame()">ออก</button>
   </div>
@@ -202,6 +268,99 @@ body { background:#0f0f1e; font-family:'Segoe UI',sans-serif; overflow:hidden; h
     </div>
   </div>
 
+  <!-- Room Password Popup -->
+  <div class="popup" id="popup-room" style="top:50%;left:50%;transform:translate(-50%,-50%);width:300px;">
+    <button class="popup-close" onclick="closePopup('popup-room')">✕</button>
+    <h3 style="color:#00ffcc;">🚪 เข้าสู่ห้องประชุม</h3>
+    <p style="font-size:12px;color:#ccc;margin-bottom:10px;" id="room-msg">กรุณาใส่รหัสผ่าน (ถ้ามี)</p>
+    <input type="password" id="room-pwd" placeholder="รหัสผ่าน..." style="width:100%;background:#0f0f1e;border:1px solid #2a2a50;color:#e8e8ff;padding:8px;border-radius:2px;margin-bottom:14px;">
+    <button onclick="confirmJoinRoom()" style="width:100%;padding:10px;background:#00ffcc;color:#0f0f1e;border:none;font-weight:bold;cursor:pointer;">เข้าร่วม</button>
+  </div>
+
+  <div class="popup" id="popup-fun" style="top:50%;left:50%;transform:translate(-50%,-50%);width:520px;max-width:95vw;max-height:85vh;overflow:auto;">
+    <button class="popup-close" onclick="closePopup('popup-fun')">✕</button>
+    <h3 style="color:#00ffcc;">🎲 กิจกรรมแก้เบื่อ</h3>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+      <button class="wb-btn" id="tab-ttt" onclick="selectFunTab('ttt')">Tic-Tac-Toe</button>
+      <button class="wb-btn" id="tab-poll" onclick="selectFunTab('poll')">Quick Poll</button>
+      <button class="wb-btn" id="tab-react" onclick="selectFunTab('react')">Reactions</button>
+    </div>
+
+    <div id="fun-ttt">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+        <div id="ttt-status" style="font-size:12px;color:#ccc;flex:1;">ยังไม่ได้เริ่มเกม</div>
+        <button class="wb-btn" onclick="wsSend({type:'ttt_join'})">Join</button>
+        <button class="wb-btn" onclick="wsSend({type:'ttt_reset'})">Reset</button>
+      </div>
+      <div id="ttt-grid" style="display:grid;grid-template-columns:repeat(3,60px);gap:8px;justify-content:center;margin:10px 0;">
+        <button class="wb-btn" style="width:60px;height:60px;font-size:22px;" onclick="tttClick(0)"></button>
+        <button class="wb-btn" style="width:60px;height:60px;font-size:22px;" onclick="tttClick(1)"></button>
+        <button class="wb-btn" style="width:60px;height:60px;font-size:22px;" onclick="tttClick(2)"></button>
+        <button class="wb-btn" style="width:60px;height:60px;font-size:22px;" onclick="tttClick(3)"></button>
+        <button class="wb-btn" style="width:60px;height:60px;font-size:22px;" onclick="tttClick(4)"></button>
+        <button class="wb-btn" style="width:60px;height:60px;font-size:22px;" onclick="tttClick(5)"></button>
+        <button class="wb-btn" style="width:60px;height:60px;font-size:22px;" onclick="tttClick(6)"></button>
+        <button class="wb-btn" style="width:60px;height:60px;font-size:22px;" onclick="tttClick(7)"></button>
+        <button class="wb-btn" style="width:60px;height:60px;font-size:22px;" onclick="tttClick(8)"></button>
+      </div>
+      <div id="ttt-role" style="font-size:12px;color:#888;text-align:center;"></div>
+    </div>
+
+    <div id="fun-poll" style="display:none;">
+      <div style="display:flex;gap:8px;flex-direction:column;margin-bottom:10px;">
+        <input id="poll-q" class="setup-input" placeholder="คำถามโพล..." maxlength="120" style="margin-bottom:0;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input id="poll-o1" class="setup-input" placeholder="ตัวเลือก 1" maxlength="60" style="flex:1;margin-bottom:0;min-width:180px;">
+          <input id="poll-o2" class="setup-input" placeholder="ตัวเลือก 2" maxlength="60" style="flex:1;margin-bottom:0;min-width:180px;">
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input id="poll-o3" class="setup-input" placeholder="ตัวเลือก 3 (ไม่จำเป็น)" maxlength="60" style="flex:1;margin-bottom:0;min-width:180px;">
+          <input id="poll-o4" class="setup-input" placeholder="ตัวเลือก 4 (ไม่จำเป็น)" maxlength="60" style="flex:1;margin-bottom:0;min-width:180px;">
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="wb-btn" onclick="createPoll()">สร้างโพล</button>
+          <button class="wb-btn" onclick="wsSend({type:'poll_close'})">ปิดโพล</button>
+        </div>
+      </div>
+      <div id="poll-live" style="border:1px solid #2a2a50;padding:10px;border-radius:4px;"></div>
+    </div>
+
+    <div id="fun-react" style="display:none;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="wb-btn" onclick="sendReaction('👍')">👍</button>
+        <button class="wb-btn" onclick="sendReaction('👏')">👏</button>
+        <button class="wb-btn" onclick="sendReaction('😂')">😂</button>
+        <button class="wb-btn" onclick="sendReaction('🔥')">🔥</button>
+        <button class="wb-btn" onclick="sendReaction('❓')">❓</button>
+        <button class="wb-btn" onclick="sendReaction('✅')">✅</button>
+      </div>
+      <div style="font-size:12px;color:#888;margin-top:10px;">กดเพื่อส่ง Reaction ให้คนในห้องเห็น</div>
+    </div>
+  </div>
+
+  <!-- Screen Share View -->
+  <div id="screen-share-view" style="position:fixed;top:50px;left:50px;right:50px;bottom:100px;background:#000;z-index:90;display:none;border:2px solid #333;">
+    <div style="position:absolute;top:0;left:0;right:0;height:30px;background:rgba(0,0,0,0.5);display:flex;justify-content:flex-end;align-items:center;padding:0 10px;">
+      <button onclick="minimizeScreenShare()" style="color:white;background:none;border:none;cursor:pointer;margin-right:10px;font-size:16px;">_</button>
+      <button onclick="closeScreenShare()" style="color:red;background:none;border:none;cursor:pointer;font-size:16px;">✕</button>
+    </div>
+    <video id="remote-screen" autoplay playsinline style="width:100%;height:calc(100% - 30px);object-fit:contain;margin-top:30px;"></video>
+  </div>
+
+  <!-- Minimized Screen -->
+  <div id="minimized-screen" onclick="maximizeScreenShare()" style="position:fixed;bottom:80px;right:20px;width:200px;height:112px;background:#000;border:2px solid #00ffcc;display:none;z-index:95;cursor:pointer;">
+    <video id="mini-remote-screen" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;"></video>
+    <div style="position:absolute;top:0;left:0;background:rgba(0,0,0,0.6);color:white;font-size:10px;padding:2px;">Screen Share</div>
+  </div>
+
+  <!-- Room Controls -->
+  <div id="room-controls" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a35;padding:10px 20px;border-radius:30px;border:1px solid #00ffcc;display:none;gap:10px;z-index:100;">
+    <span style="color:#00ffcc;font-weight:bold;margin-right:10px;" id="current-room-name">Room 1</span>
+    <button id="btn-mic" onclick="toggleMic()" style="background:#2a2a50;color:white;border:none;padding:6px 12px;border-radius:15px;cursor:pointer;">🎤 เปิดไมค์</button>
+    <button id="btn-share" onclick="toggleScreenShare()" style="background:#3c7be8;color:white;border:none;padding:6px 12px;border-radius:15px;cursor:pointer;">🖥️ แชร์หน้าจอ</button>
+    <button onclick="leaveRoom()" style="background:#ff4444;color:white;border:none;padding:6px 12px;border-radius:15px;cursor:pointer;">✕ ออกจากห้อง</button>
+  </div>
+
   <!-- Chat -->
   <div id="chat-panel">
     <div id="chat-msgs"></div>
@@ -230,8 +389,18 @@ body { background:#0f0f1e; font-family:'Segoe UI',sans-serif; overflow:hidden; h
 // WS + STATE
 // ══════════════════════════════════════════════
 let ws = null;
-let myId = null, myName = '', myColor = '#00ffcc';
+let myId = null, myName = '', myColor = '#00ffcc', myAcc = 'none', myHair = 'none', myHairColor = '#2c2c2c', myGender = 'male';
 let otherPlayers = {};
+let meetingRooms = {};
+let currentRoomId = null;
+let isScreenSharing = false;
+let screenStream = null;
+let shareSharerId = null;
+let tttState = null;
+let tttRole = null;
+let pollState = null;
+let pollCounts = null;
+let funTab = 'ttt';
 
 // ══════════════════════════════════════════════
 // AUDIO + WebRTC
@@ -261,19 +430,33 @@ async function createPeerConnection(remoteId) {
   }
   
   pc.ontrack = (event) => {
-    if (!audioElements[remoteId]) {
-      const audio = new Audio();
-      audio.autoplay = true;
-      audio.playsinline = true;
-      audioElements[remoteId] = audio;
+    if (event.track.kind === 'audio') {
+      if (!audioElements[remoteId]) {
+        const audio = new Audio();
+        audio.autoplay = true;
+        audio.playsinline = true;
+        audioElements[remoteId] = audio;
+      }
+      audioElements[remoteId].srcObject = event.streams[0];
+    } else if (event.track.kind === 'video') {
+      const v = document.getElementById('remote-screen');
+      v.srcObject = event.streams[0];
+      document.getElementById('screen-share-view').style.display = 'block';
     }
-    audioElements[remoteId].srcObject = event.streams[0];
   };
   
   pc.onicecandidate = (event) => {
     if (event.candidate) {
       wsSend({ type: 'ice', to: remoteId, candidate: event.candidate });
     }
+  };
+
+  pc.onnegotiationneeded = async () => {
+    try {
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      wsSend({ type: 'sdp', to: remoteId, sdp: pc.localDescription });
+    } catch(err) { console.error(err); }
   };
   
   pc.onconnectionstatechange = () => {
@@ -333,6 +516,40 @@ document.querySelectorAll('.color-opt').forEach(el => {
   });
 });
 
+// Accessory picker
+document.querySelectorAll('.acc-opt').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.acc-opt').forEach(e => e.classList.remove('sel'));
+    el.classList.add('sel');
+    myAcc = el.dataset.acc;
+  });
+});
+
+// Hairstyle picker
+document.querySelectorAll('.hair-opt').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.hair-opt').forEach(e => e.classList.remove('sel'));
+    el.classList.add('sel');
+    myHair = el.dataset.hair;
+  });
+});
+
+document.querySelectorAll('.haircolor-opt').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.haircolor-opt').forEach(e => e.classList.remove('sel'));
+    el.classList.add('sel');
+    myHairColor = el.dataset.hc;
+  });
+});
+
+document.querySelectorAll('.gender-opt').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.gender-opt').forEach(e => e.classList.remove('sel'));
+    el.classList.add('sel');
+    myGender = el.dataset.gender;
+  });
+});
+
 // ══════════════════════════════════════════════
 // JOIN
 // ══════════════════════════════════════════════
@@ -342,7 +559,11 @@ function joinGame() {
   if (!name) { nameEl.classList.add('err'); nameEl.focus(); return; }
   nameEl.classList.remove('err');
   myName = name;
+  myGender = document.querySelector('.gender-opt.sel').dataset.gender;
   myColor = document.querySelector('.color-opt.sel').dataset.c;
+  myAcc = document.querySelector('.acc-opt.sel').dataset.acc;
+  myHair = document.querySelector('.hair-opt.sel').dataset.hair;
+  myHairColor = document.querySelector('.haircolor-opt.sel').dataset.hc;
 
   const st = document.getElementById('conn-status');
   st.textContent = 'กำลังเชื่อมต่อ...'; st.className = 'status-msg';
@@ -352,7 +573,7 @@ function joinGame() {
 
   ws.onopen = () => {
     initAudio();
-    ws.send(JSON.stringify({ type:'join', name:myName, color:myColor, x:player.x, y:player.y }));
+    ws.send(JSON.stringify({ type:'join', name:myName, gender:myGender, color:myColor, accessory:myAcc, hairstyle:myHair, hairColor:myHairColor, x:player.x, y:player.y }));
   };
   ws.onerror = () => { st.textContent = 'เชื่อมต่อไม่ได้ กรุณาลองใหม่'; st.className = 'status-msg err'; };
   ws.onclose = () => { if (myId) showToast('การเชื่อมต่อขาด...'); };
@@ -365,6 +586,8 @@ function handleMessage(e) {
 
     case 'init':
       myId = data.id;
+      // Load meeting rooms
+      meetingRooms = data.meetingRooms || {};
       // Load existing players
       Object.entries(data.players).forEach(([id, p]) => {
         if (id !== myId) {
@@ -386,6 +609,7 @@ function handleMessage(e) {
       break;
 
     case 'player_join':
+      if (data.id === myId) break;
       otherPlayers[data.id] = data.player;
       otherPlayers[data.id].targetX = data.player.x;
       otherPlayers[data.id].targetY = data.player.y;
@@ -404,6 +628,7 @@ function handleMessage(e) {
         otherPlayers[data.id].targetY = data.y;
         otherPlayers[data.id].dir = data.dir;
         otherPlayers[data.id].frame = data.frame;
+        if (data.isMicOn !== undefined) otherPlayers[data.id].isMicOn = data.isMicOn;
       }
       break;
 
@@ -424,7 +649,50 @@ function handleMessage(e) {
       break;
 
     case 'spotlight':
+      if (data.id === myId) break;
       showToast(`📢 ${otherPlayers[data.id]?.name || '?'} กำลัง Broadcast!`);
+      break;
+
+    case 'map_changed':
+      loadMap(data.mapId);
+      if (data.x !== undefined) { player.x = data.x; player.y = data.y; }
+      otherPlayers = {};
+      Object.entries(data.players).forEach(([id, p]) => {
+        otherPlayers[id] = p;
+        otherPlayers[id].targetX = p.x;
+        otherPlayers[id].targetY = p.y;
+      });
+      updatePlayerList();
+      break;
+
+    case 'room_update':
+      meetingRooms = data.rooms;
+      break;
+
+    case 'room_joined':
+      currentRoomId = data.roomId;
+      document.getElementById('room-controls').style.display = 'flex';
+      const rObj = OBJECTS.find(o => o.roomId === data.roomId);
+      if (rObj) document.getElementById('current-room-name').textContent = rObj.label;
+      showToast('เข้าสู่ห้องประชุม');
+      break;
+
+    case 'room_left':
+      currentRoomId = null;
+      document.getElementById('room-controls').style.display = 'none';
+      if(isScreenSharing) toggleScreenShare();
+      document.getElementById('screen-share-view').style.display = 'none';
+      showToast('ออกจากห้องประชุม');
+      break;
+
+    case 'room_error':
+      showToast('❌ ' + data.message);
+      break;
+
+    case 'player_room_update':
+      if (otherPlayers[data.id]) {
+        otherPlayers[data.id].roomId = data.roomId;
+      }
       break;
 
     case 'sdp':
@@ -433,6 +701,60 @@ function handleMessage(e) {
 
     case 'ice':
       handleICE(data.from, data.candidate);
+      break;
+
+    case 'share_confirmed':
+      startScreenShare();
+      break;
+    case 'share_error':
+      showToast('❌ ' + data.message);
+      break;
+    case 'share_state':
+      shareSharerId = data.sharerId || null;
+      updateShareButtonState();
+      break;
+    case 'share_started':
+      shareSharerId = data.sharerId || shareSharerId;
+      updateShareButtonState();
+      showToast('มีการแชร์หน้าจอ');
+      break;
+    case 'share_stopped':
+      shareSharerId = null;
+      updateShareButtonState();
+      document.getElementById('screen-share-view').style.display = 'none';
+      document.getElementById('minimized-screen').style.display = 'none';
+      const v = document.getElementById('remote-screen');
+      v.srcObject = null;
+      showToast('จบการแชร์หน้าจอ');
+      break;
+
+    case 'reaction':
+      if (data.id === myId) break;
+      if (otherPlayers[data.id]) {
+        otherPlayers[data.id].bubble = data.emoji;
+        otherPlayers[data.id].bubbleExp = Date.now() + 1500;
+      }
+      break;
+
+    case 'ttt_role':
+      tttRole = data.role;
+      renderTtt();
+      break;
+    case 'ttt_state':
+      tttState = data.state;
+      renderTtt();
+      break;
+    case 'ttt_error':
+      showToast('❌ ' + data.message);
+      break;
+
+    case 'poll_state':
+      pollState = data.poll || null;
+      pollCounts = data.counts || null;
+      renderPoll();
+      break;
+    case 'poll_error':
+      showToast('❌ ' + data.message);
       break;
   }
 }
@@ -453,24 +775,82 @@ const TILE=32, COLS=40, ROWS=28;
 const WW=COLS*TILE, WH=ROWS*TILE;
 
 // Build map
-const MAP=[];
-for(let r=0;r<ROWS;r++){MAP[r]=[];for(let c=0;c<COLS;c++)MAP[r][c]=0;}
-for(let c=0;c<COLS;c++){MAP[0][c]=1;MAP[ROWS-1][c]=1;}
-for(let r=0;r<ROWS;r++){MAP[r][0]=1;MAP[r][COLS-1]=1;}
-for(let r=4;r<14;r++) MAP[r][14]=1;
-for(let c=14;c<28;c++) MAP[4][c]=1;
-for(let r=14;r<ROWS-1;r++) MAP[r][28]=1;
-MAP[9][14]=0; MAP[4][21]=0; MAP[20][28]=0;
-[[3,3],[3,5],[3,7],[5,3],[5,5],[5,7],[8,3],[8,5],[8,7],[10,3],[10,5]].forEach(([r,c])=>MAP[r][c]=2);
-for(let r=6;r<13;r++) for(let c=16;c<22;c++) if(MAP[r][c]===0) MAP[r][c]=3;
-MAP[2][35]=4;
+let MAP = [];
+let currentMapType = 'office';
 
-const OBJECTS=[
+function buildMap(type) {
+  currentMapType = type;
+  MAP = [];
+  for(let r=0;r<ROWS;r++){MAP[r]=[];for(let c=0;c<COLS;c++)MAP[r][c]=0;}
+  
+  if (type === 'office') {
+    for(let c=0;c<COLS;c++){MAP[0][c]=1;MAP[ROWS-1][c]=1;}
+    for(let r=0;r<ROWS;r++){MAP[r][0]=1;MAP[r][COLS-1]=1;}
+    for(let r=4;r<14;r++) MAP[r][14]=1;
+    for(let c=14;c<28;c++) MAP[4][c]=1;
+    for(let r=14;r<ROWS-1;r++) MAP[r][28]=1;
+    MAP[9][14]=0; MAP[4][21]=0; MAP[20][28]=0;
+    [[3,3],[3,5],[3,7],[5,3],[5,5],[5,7],[8,3],[8,5],[8,7],[10,3],[10,5]].forEach(([r,c])=>MAP[r][c]=2);
+    for(let r=6;r<13;r++) for(let c=16;c<22;c++) if(MAP[r][c]===0) MAP[r][c]=3;
+    MAP[2][35]=4;
+  } else if (type === 'garden') {
+    for(let c=0;c<COLS;c++){MAP[0][c]=1;MAP[ROWS-1][c]=1;}
+    for(let r=0;r<ROWS;r++){MAP[r][0]=1;MAP[r][COLS-1]=1;}
+    // Simple garden layout
+    for(let r=0;r<ROWS;r+=4) for(let c=0;c<COLS;c+=4) if(Math.random()>0.7) MAP[r][c]=1;
+    for(let r=10;r<18;r++) for(let c=15;c<25;c++) MAP[r][c]=1; 
+    for(let r=0;r<ROWS;r++) MAP[r][20]=0;
+    for(let c=0;c<COLS;c++) MAP[14][c]=0;
+  } else if (type.startsWith('room')) {
+    // Meeting Room Layout
+    for(let r=0;r<ROWS;r++){MAP[r]=[];for(let c=0;c<COLS;c++)MAP[r][c]=1;} // Fill with walls
+    // Room space (Open space, no table)
+    for(let r=5;r<25;r++) for(let c=10;c<30;c++) MAP[r][c]=0;
+    // Walls around room
+    for(let c=10;c<30;c++){MAP[5][c]=1;MAP[24][c]=1;}
+    for(let r=5;r<25;r++){MAP[r][10]=1;MAP[r][29]=1;}
+    // No table to allow walking freely
+  }
+}
+
+buildMap('office');
+
+const OBJECTS_OFFICE = [
   {id:'wb',  x:15*TILE,y:6*TILE, w:3*TILE,h:2*TILE,label:'Whiteboard',emoji:'📋',color:'#3c7be8',action:'whiteboard'},
   {id:'yt',  x:8*TILE, y:6*TILE, w:3*TILE,h:2*TILE,label:'YouTube',   emoji:'📺',color:'#ff4444',action:'youtube'},
   {id:'chat',x:3*TILE, y:21*TILE,w:3*TILE,h:2*TILE,label:'Chat',      emoji:'💬',color:'#00ffcc',action:'chat'},
   {id:'spot',x:34*TILE,y:1*TILE, w:2*TILE,h:2*TILE,label:'Spotlight', emoji:'📢',color:'#ffe066',action:'spotlight'},
+  {id:'room1', x:35*TILE, y:10*TILE, w:2*TILE, h:2*TILE, label:'Meeting 1', emoji:'🚪', color:'#ff00ff', action:'room', roomId:'room1'},
+  {id:'room2', x:35*TILE, y:14*TILE, w:2*TILE, h:2*TILE, label:'Meeting 2', emoji:'🚪', color:'#ff00ff', action:'room', roomId:'room2'},
+  {id:'room3', x:35*TILE, y:18*TILE, w:2*TILE, h:2*TILE, label:'Meeting 3', emoji:'🚪', color:'#ff00ff', action:'room', roomId:'room3'},
+  {id:'room4', x:35*TILE, y:22*TILE, w:2*TILE, h:2*TILE, label:'Meeting 4', emoji:'🚪', color:'#ff00ff', action:'room', roomId:'room4'},
 ];
+
+const OBJECTS_GARDEN = [
+  {id:'chat',x:3*TILE, y:21*TILE,w:3*TILE,h:2*TILE,label:'Chat',      emoji:'💬',color:'#00ffcc',action:'chat'},
+];
+
+const OBJECTS_ROOM = [
+  {id:'screen', x:20*TILE, y:6*TILE, w:4*TILE, h:1, label:'Presentation Screen', emoji:'🖥️', color:'#3c7be8', action:'screen'},
+  {id:'fun', x:12*TILE, y:6*TILE, w:3*TILE, h:2*TILE, label:'Mini Games', emoji:'🎲', color:'#00ffcc', action:'fun'},
+];
+
+let OBJECTS = OBJECTS_OFFICE;
+
+function updateObjects() {
+  if (currentMapType === 'office') OBJECTS = OBJECTS_OFFICE;
+  else if (currentMapType === 'garden') OBJECTS = OBJECTS_GARDEN;
+  else if (currentMapType.startsWith('room')) OBJECTS = OBJECTS_ROOM;
+}
+
+function loadMap(type) {
+  buildMap(type);
+  updateObjects();
+}
+
+function changeMap(type) {
+  wsSend({ type: 'change_map', mapId: type, x: 3*TILE, y: 20*TILE });
+}
 
 const player={x:3*TILE,y:20*TILE,w:24,h:24,speed:2.6,frame:0,dir:2,anim:0};
 const cam={x:0,y:0};
@@ -494,7 +874,7 @@ function move(e,dx,dy){
 // ══════════════════════════════════════════════
 // DRAW
 // ══════════════════════════════════════════════
-function drawChar(x,y,color,name,frame,dir,isMe,vol=0){
+function drawChar(x,y,color,name,frame,dir,isMe,vol=0,acc='none',hair='none',gender='male',hairColor='#2c2c2c',isMicOn=true){
   const bob=[0,-2,0,2][Math.floor(frame)%4];
   if(vol>0.05){
     ctx.save(); ctx.globalAlpha=vol*0.22;
@@ -505,12 +885,67 @@ function drawChar(x,y,color,name,frame,dir,isMe,vol=0){
   ctx.save(); ctx.globalAlpha=0.2; ctx.fillStyle='#000';
   ctx.beginPath(); ctx.ellipse(x,y+11,8,4,0,0,Math.PI*2); ctx.fill(); ctx.restore();
   ctx.fillStyle=color; ctx.beginPath(); ctx.roundRect(x-9,y-10+bob,18,20,4); ctx.fill();
+  if(gender==='female'){
+    ctx.fillStyle=color; ctx.beginPath(); ctx.moveTo(x-9,y+8+bob); ctx.lineTo(x+9,y+8+bob); ctx.lineTo(x,y+18+bob); ctx.closePath(); ctx.fill();
+  } else {
+    ctx.fillStyle=color; ctx.fillRect(x-8,y+8+bob,6,8); ctx.fillRect(x+2,y+8+bob,6,8);
+  }
   ctx.fillStyle=isMe?'#ffd9a0':'#ffcca0'; ctx.beginPath(); ctx.arc(x,y-17+bob,10,0,Math.PI*2); ctx.fill();
+
+  // Hair
+  if(hair && hair !== 'none') {
+    ctx.fillStyle = hairColor;
+    if (hair === 'short') {
+      ctx.beginPath(); ctx.arc(x, y-18+bob, 10.5, Math.PI, 0); ctx.fill();
+    } else if (hair === 'long') {
+      ctx.beginPath(); 
+      ctx.moveTo(x-10, y-17+bob); ctx.lineTo(x-10, y-4+bob); 
+      ctx.lineTo(x+10, y-4+bob); ctx.lineTo(x+10, y-17+bob); 
+      ctx.arc(x, y-18+bob, 10.5, Math.PI, 0); ctx.fill();
+    } else if (hair === 'mohawk') {
+      ctx.fillStyle = hairColor;
+      ctx.beginPath(); ctx.ellipse(x, y-26+bob, 3, 8, 0, 0, Math.PI*2); ctx.fill();
+    } else if (hair === 'afro') {
+      ctx.fillStyle = hairColor;
+      ctx.beginPath(); ctx.arc(x, y-21+bob, 13, 0, Math.PI*2); ctx.fill();
+    }
+  }
+
+  // Mic Status
+  if (!isMicOn) {
+    ctx.font = '12px Segoe UI';
+    ctx.fillStyle = '#ff4444';
+    ctx.textAlign = 'center';
+    ctx.fillText('🔇', x+14, y-28+bob);
+  }
+
   const eo=[[0,1],[-3,1],[0,1],[3,1]][dir];
   ctx.fillStyle='#333';
   ctx.beginPath(); ctx.arc(x+eo[0]-3,y-18+bob+eo[1],1.5,0,Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc(x+eo[0]+3,y-18+bob+eo[1],1.5,0,Math.PI*2); ctx.fill();
   if(isMe){ctx.fillStyle='#00ffcc';ctx.beginPath();ctx.moveTo(x-4,y-31+bob);ctx.lineTo(x+4,y-31+bob);ctx.lineTo(x,y-27+bob);ctx.fill();}
+
+  // Accessories
+  if(acc==='hat'){
+    ctx.fillStyle='#222'; ctx.beginPath(); ctx.rect(x-12,y-26+bob,24,4); ctx.rect(x-8,y-38+bob,16,12); ctx.fill();
+  } else if(acc==='glasses'){
+    ctx.strokeStyle='#333'; ctx.lineWidth=1.5; ctx.beginPath();
+    ctx.moveTo(x+eo[0]-6,y-18+bob+eo[1]); ctx.lineTo(x+eo[0]+6,y-18+bob+eo[1]);
+    ctx.stroke();
+    ctx.fillStyle='rgba(0,0,0,0.5)';
+    ctx.beginPath(); ctx.arc(x+eo[0]-3,y-18+bob+eo[1],2.5,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x+eo[0]+3,y-18+bob+eo[1],2.5,0,Math.PI*2); ctx.fill();
+  } else if(acc==='headphones'){
+    ctx.strokeStyle='#444'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(x,y-17+bob,11,Math.PI,0); ctx.stroke();
+    ctx.fillStyle='#f00'; ctx.fillRect(x-13,y-20+bob,4,8); ctx.fillRect(x+9,y-20+bob,4,8);
+  } else if(acc==='crown'){
+    ctx.fillStyle='#ffd700'; ctx.beginPath(); ctx.moveTo(x-8,y-24+bob);
+    ctx.lineTo(x-8,y-34+bob); ctx.lineTo(x-4,y-28+bob); ctx.lineTo(x,y-36+bob);
+    ctx.lineTo(x+4,y-28+bob); ctx.lineTo(x+8,y-34+bob); ctx.lineTo(x+8,y-24+bob); ctx.fill();
+  } else if(acc==='mask'){
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.roundRect(x+eo[0]-6,y-15+bob+eo[1],12,8,2); ctx.fill();
+  }
+
   ctx.save(); ctx.font='bold 10px Segoe UI'; ctx.textAlign='center';
   const tw=ctx.measureText(name).width;
   ctx.fillStyle='rgba(0,0,0,0.65)'; ctx.beginPath(); ctx.roundRect(x-tw/2-4,y-43+bob,tw+8,14,3); ctx.fill();
@@ -557,10 +992,15 @@ function update(){
   cam.y=Math.max(0,Math.min(WH-canvas.height,player.y-canvas.height/2));
 
   const pr=Math.floor(player.y/TILE),pc=Math.floor(player.x/TILE);
-  privateZone=(pr>=6&&pr<13&&pc>=16&&pc<22);
-  const onSpot=(pr<=3&&pc>=34&&pc<=36);
-  if(onSpot&&!spotlightActive){ spotlightActive=true; wsSend({type:'spotlight'}); showToast('📢 Spotlight! ทุกคนได้ยินคุณ'); }
-  if(!onSpot) spotlightActive=false;
+  if (currentMapType === 'office') {
+    privateZone=(pr>=6&&pr<13&&pc>=16&&pc<22);
+    const onSpot=(pr<=3&&pc>=34&&pc<=36);
+    if(onSpot&&!spotlightActive){ spotlightActive=true; wsSend({type:'spotlight'}); showToast('📢 Spotlight! ทุกคนได้ยินคุณ'); }
+    if(!onSpot) spotlightActive=false;
+  } else {
+    privateZone = false;
+    spotlightActive = false;
+  }
 
   const nearby=Object.values(otherPlayers).some(p=>Math.hypot(player.x-p.x,player.y-p.y)<TILE*3.5);
   document.getElementById('chip-near').className='chip'+(nearby?' on':'');
@@ -569,7 +1009,7 @@ function update(){
 
   // Send position every 2 frames
   dbTick++;
-  if(dbTick>=2){ dbTick=0; wsSend({type:'move',x:player.x,y:player.y,dir:player.dir,frame:player.frame}); }
+  if(dbTick>=2){ dbTick=0; wsSend({type:'move',x:player.x,y:player.y,dir:player.dir,frame:player.frame,isMicOn:isMicOn}); }
 }
 
 function draw(){
@@ -626,8 +1066,18 @@ function draw(){
     const pInPriv=(pR>=6&&pR<13&&pC>=16&&pC<22);
     const pOnSpot=(pR<=3&&pC>=34&&pC<=36);
 
-    // Logic: Spotlight overrides everything. Otherwise, Private Zone isolation.
-    if (pOnSpot) {
+    // Logic: Room > Spotlight > Private Zone
+    if (currentRoomId) {
+      // I am in a room
+      if (p.roomId === currentRoomId) {
+        vol = 1.0;
+      } else {
+        vol = 0;
+      }
+    } else if (p.roomId) {
+      // They are in a room, I am not
+      vol = 0;
+    } else if (pOnSpot) {
       vol = 1;
       // Visual indicator for broadcasting
       ctx.save();
@@ -643,7 +1093,7 @@ function draw(){
     // Apply volume to audio element
     if(audioElements[id]) audioElements[id].volume = vol;
 
-    drawChar(p.x,p.y,p.color,p.name,p.frame||0,p.dir||2,false,vol);
+    drawChar(p.x,p.y,p.color,p.name,p.frame||0,p.dir||2,false,vol,p.accessory,p.hairstyle,p.gender,p.hairColor,p.isMicOn!==false);
     if(p.bubble&&now<p.bubbleExp) drawBubble(p.x,p.y,p.bubble);
     if(vol>0.05){
       const bx=p.x-15,by=p.y+14;
@@ -662,7 +1112,8 @@ function draw(){
     ctx.fillText('📢 You are Broadcasting', player.x, player.y - 55);
     ctx.restore();
   }
-  drawChar(player.x,player.y,myColor,myName+'(คุณ)',player.frame,player.dir,true);
+  drawChar(player.x,player.y,myColor,myName+'(คุณ)',player.frame,player.dir,true,0,myAcc,myHair,myGender,myHairColor,isMicOn);
+  if(player.bubble&&Date.now()<player.bubbleExp) drawBubble(player.x,player.y,player.bubble);
   ctx.restore();
 
   // Overlays
@@ -709,16 +1160,18 @@ function updatePlayerList(){
 // KEYBOARD
 // ══════════════════════════════════════════════
 window.addEventListener('keydown', e=>{
-  keys[e.key]=true;
   const inp=document.getElementById('chat-input');
+  const ae = document.activeElement;
+  const typing = ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA');
+  if (!typing) keys[e.key]=true;
   if(e.key==='Enter'){
     if(document.activeElement===inp) sendChat();
     else inp.focus();
     e.preventDefault();
   }
-  if((e.key==='x'||e.key==='X') && document.activeElement!==inp) tryInteract();
+  if((e.key==='x'||e.key==='X') && !typing && document.activeElement!==inp) tryInteract();
 });
-window.addEventListener('keyup',e=>keys[e.key]=false);
+window.addEventListener('keyup',e=>{ keys[e.key]=false; });
 
 function tryInteract(){
   for(const obj of OBJECTS){
@@ -728,6 +1181,8 @@ function tryInteract(){
       else if(obj.action==='youtube') openPopup('popup-yt');
       else if(obj.action==='chat') document.getElementById('chat-input').focus();
       else if(obj.action==='spotlight') showToast('📢 เดินไปที่กระเบื้องสีเหลืองมุมขวาบน!');
+      else if(obj.action==='room') openRoomPopup(obj.roomId);
+      else if(obj.action==='fun') openFunPopup();
       return;
     }
   }
@@ -828,6 +1283,231 @@ function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
   clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ══════════════════════════════════════════════
+// MEETING ROOMS
+// ══════════════════════════════════════════════
+let pendingRoomId = null;
+
+function openRoomPopup(roomId) {
+  pendingRoomId = roomId;
+  const room = meetingRooms[roomId];
+  const msgEl = document.getElementById('room-msg');
+  if (room && room.locked) {
+    msgEl.textContent = '🔒 ห้องนี้มีรหัสผ่าน';
+  } else if (room && room.count === 0) {
+    msgEl.textContent = '🆕 สร้างรหัสผ่านสำหรับห้องนี้ (ว่างไว้เพื่อไม่ใช้)';
+  } else {
+    msgEl.textContent = '🔓 เข้าสู่ห้อง (ไม่มีรหัสผ่าน)';
+  }
+  document.getElementById('room-pwd').value = '';
+  openPopup('popup-room');
+  document.getElementById('room-pwd').focus();
+}
+
+function confirmJoinRoom() {
+  const pwd = document.getElementById('room-pwd').value;
+  wsSend({ type: 'join_room', roomId: pendingRoomId, password: pwd });
+  closePopup('popup-room');
+}
+
+function leaveRoom() {
+  wsSend({ type: 'leave_room' });
+  if (isScreenSharing) toggleScreenShare();
+}
+
+function openFunPopup() {
+  selectFunTab(funTab);
+  openPopup('popup-fun');
+  renderTtt();
+  renderPoll();
+}
+
+function selectFunTab(tab) {
+  funTab = tab;
+  document.getElementById('fun-ttt').style.display = tab === 'ttt' ? 'block' : 'none';
+  document.getElementById('fun-poll').style.display = tab === 'poll' ? 'block' : 'none';
+  document.getElementById('fun-react').style.display = tab === 'react' ? 'block' : 'none';
+  document.getElementById('tab-ttt').style.background = tab === 'ttt' ? '#3a3a70' : '#2a2a50';
+  document.getElementById('tab-poll').style.background = tab === 'poll' ? '#3a3a70' : '#2a2a50';
+  document.getElementById('tab-react').style.background = tab === 'react' ? '#3a3a70' : '#2a2a50';
+}
+
+function tttClick(index) {
+  wsSend({ type: 'ttt_move', index });
+}
+
+function renderTtt() {
+  const statusEl = document.getElementById('ttt-status');
+  const roleEl = document.getElementById('ttt-role');
+  const grid = document.getElementById('ttt-grid');
+  const buttons = Array.from(grid.querySelectorAll('button'));
+
+  if (!tttState) {
+    statusEl.textContent = 'ยังไม่มีสถานะเกม';
+    roleEl.textContent = '';
+    buttons.forEach(b => b.textContent = '');
+    return;
+  }
+
+  const winner = tttState.winner;
+  if (winner === 'DRAW') statusEl.textContent = 'ผล: เสมอ';
+  else if (winner) statusEl.textContent = `ผู้ชนะ: ${winner}`;
+  else statusEl.textContent = `ตาถัดไป: ${tttState.next}`;
+
+  roleEl.textContent = tttRole ? `คุณคือ ${tttRole}` : 'คุณเป็นผู้ชม';
+  buttons.forEach((b, i) => {
+    const v = tttState.board[i];
+    b.textContent = v ? v : '';
+    b.style.background = (tttState.winningLine && tttState.winningLine.includes(i)) ? '#00ffcc33' : '#2a2a50';
+  });
+}
+
+function createPoll() {
+  const q = document.getElementById('poll-q').value.trim();
+  const o1 = document.getElementById('poll-o1').value.trim();
+  const o2 = document.getElementById('poll-o2').value.trim();
+  const o3 = document.getElementById('poll-o3').value.trim();
+  const o4 = document.getElementById('poll-o4').value.trim();
+  const options = [o1, o2, o3, o4].filter(Boolean);
+  wsSend({ type: 'poll_create', question: q, options });
+}
+
+function votePoll(optionIndex) {
+  wsSend({ type: 'poll_vote', optionIndex });
+}
+
+function renderPoll() {
+  const box = document.getElementById('poll-live');
+  if (!pollState) {
+    box.innerHTML = '<div style="color:#888;font-size:12px;">ยังไม่มีโพล</div>';
+    return;
+  }
+  const counts = Array.isArray(pollCounts) ? pollCounts : [];
+  const total = counts.reduce((a, b) => a + b, 0) || 0;
+  const openText = pollState.open ? 'เปิดโหวต' : 'ปิดโหวต';
+  let html = `<div style="font-weight:700;color:#00ffcc;margin-bottom:6px;">${openText}</div>`;
+  html += `<div style="font-size:13px;margin-bottom:10px;">${pollState.question}</div>`;
+  pollState.options.forEach((opt, idx) => {
+    const c = counts[idx] || 0;
+    const pct = total ? Math.round((c / total) * 100) : 0;
+    const disabled = pollState.open ? '' : 'disabled';
+    html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">` +
+      `<button class="wb-btn" onclick="votePoll(${idx})" ${disabled}>โหวต</button>` +
+      `<div style="flex:1;min-width:180px;">${opt}</div>` +
+      `<div style="width:54px;text-align:right;color:#ccc;">${c}</div>` +
+      `<div style="width:46px;text-align:right;color:#666;">${pct}%</div>` +
+      `</div>`;
+  });
+  box.innerHTML = html;
+}
+
+function sendReaction(emoji) {
+  wsSend({ type: 'reaction', emoji });
+  player.bubble = emoji;
+  player.bubbleExp = Date.now() + 1500;
+}
+
+function updateShareButtonState() {
+  const btn = document.getElementById('btn-share');
+  if (!btn) return;
+  const lockedByOther = shareSharerId && shareSharerId !== myId;
+  btn.disabled = !!lockedByOther;
+  btn.style.opacity = lockedByOther ? 0.5 : 1;
+}
+
+// Screen Sharing
+let isMicOn = true;
+
+function toggleMic() {
+  isMicOn = !isMicOn;
+  if (myStream) {
+    myStream.getAudioTracks().forEach(t => t.enabled = isMicOn);
+  }
+  const btn = document.getElementById('btn-mic');
+  if (isMicOn) {
+    btn.textContent = '🎤 เปิดไมค์';
+    btn.style.background = '#2a2a50';
+  } else {
+    btn.textContent = '🔇 ปิดไมค์';
+    btn.style.background = '#ff4444';
+  }
+}
+
+async function toggleScreenShare() {
+  if (!isScreenSharing) {
+    wsSend({ type: 'start_share' });
+  } else {
+    wsSend({ type: 'stop_share' });
+    stopScreenShareLocal();
+  }
+}
+
+async function startScreenShare() {
+  try {
+    screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+    isScreenSharing = true;
+    shareSharerId = myId;
+    updateShareButtonState();
+    
+    const videoTrack = screenStream.getVideoTracks()[0];
+    videoTrack.onended = () => { toggleScreenShare(); };
+
+    Object.values(peerConnections).forEach(pc => {
+      const senders = pc.getSenders();
+      const sender = senders.find(s => s.track && s.track.kind === 'video');
+      if (sender) {
+        sender.replaceTrack(videoTrack);
+      } else {
+        pc.addTrack(videoTrack, screenStream);
+      }
+    });
+    
+    // Notify others via renegotiation (simplified)
+    for (const id in peerConnections) {
+       // Ideally we should renegotiate here
+    }
+
+    showToast('เริ่มแชร์หน้าจอ');
+  } catch (err) {
+    console.error(err);
+    wsSend({ type: 'stop_share' });
+    showToast('ไม่สามารถแชร์หน้าจอได้');
+  }
+}
+
+function stopScreenShareLocal() {
+  if (screenStream) {
+    screenStream.getTracks().forEach(t => t.stop());
+    screenStream = null;
+  }
+  isScreenSharing = false;
+  if (shareSharerId === myId) shareSharerId = null;
+  updateShareButtonState();
+  showToast('หยุดแชร์หน้าจอ');
+}
+
+function closeScreenShare() {
+  document.getElementById('screen-share-view').style.display = 'none';
+  const v = document.getElementById('remote-screen');
+  v.srcObject = null;
+}
+
+function minimizeScreenShare() {
+  document.getElementById('screen-share-view').style.display = 'none';
+  const v = document.getElementById('remote-screen');
+  const miniV = document.getElementById('mini-remote-screen');
+  miniV.srcObject = v.srcObject;
+  document.getElementById('minimized-screen').style.display = 'block';
+}
+
+function maximizeScreenShare() {
+  document.getElementById('minimized-screen').style.display = 'none';
+  const v = document.getElementById('remote-screen');
+  const miniV = document.getElementById('mini-remote-screen');
+  v.srcObject = miniV.srcObject;
+  document.getElementById('screen-share-view').style.display = 'block';
 }
 </script>
 </body>
