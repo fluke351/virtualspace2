@@ -135,6 +135,35 @@ body { background:var(--bg-dark); font-family:'Inter', sans-serif; overflow:hidd
 .pl-item:hover { background:rgba(255,255,255,0.05); }
 .pl-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; box-shadow:0 0 5px currentColor; }
 
+/* ── ANNOUNCEMENT ── */
+#announce-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #ef4444;
+  color: white;
+  padding: 8px 0;
+  font-weight: bold;
+  z-index: 9999;
+  display: none;
+  overflow: hidden;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+#announce-text {
+  display: inline-block;
+  padding-left: 100%;
+  animation: marquee 15s linear infinite;
+  font-size: 16px;
+}
+
+@keyframes marquee {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-100%, 0); }
+}
+
 /* ── POPUP ── */
 .popup {
   position:absolute; background:var(--bg-panel); backdrop-filter:var(--glass); border:1px solid var(--border);
@@ -314,8 +343,24 @@ body { background:var(--bg-dark); font-family:'Inter', sans-serif; overflow:hidd
       <div class="chip" id="chip-spot" style="--bg-cc:#fbbf24">Spotlight</div>
     </div>
     <button id="btn-leave" onclick="leaveGame()">Exit</button>
-    <button id="btn-fullscreen" onclick="toggleFullScreen()">⛶</button>
+      <button id="btn-announce" onclick="openAnnouncePopup()" style="background:#ef4444;color:white;border:none;">📢</button>
+      <button id="btn-fullscreen" onclick="toggleFullScreen()">⛶</button>
+    </div>
   </div>
+</div>
+
+<!-- Announcement Banner -->
+<div id="announce-banner">
+  <div id="announce-text"></div>
+</div>
+
+<!-- Announcement Popup -->
+<div class="popup" id="popup-announce" style="top:20%;left:50%;transform:translateX(-50%);width:400px;z-index:9999;">
+  <button class="popup-close" onclick="closePopup('popup-announce')">✕</button>
+  <h3 style="color:#ef4444;">📢 Announcement</h3>
+  <p style="color:#94a3b8; font-size:12px; margin-bottom:12px;">ส่งข้อความประกาศถึงทุกคนในห้อง (ตัววิ่งด้านบน)</p>
+  <textarea id="announce-input" placeholder="พิมพ์ข้อความประกาศ..." style="width:100%;height:80px;background:#0f172a;border:1px solid #334155;color:white;padding:8px;border-radius:6px;margin-bottom:12px;"></textarea>
+  <button class="wb-btn" onclick="sendAnnouncement()" style="background:#ef4444;width:100%;">ส่งประกาศ</button>
 </div>
 
 <!-- GAME -->
@@ -685,6 +730,27 @@ setInterval(() => {
 // Initial Preview
 drawPreview();
 
+function openAnnouncePopup() {
+  openPopup('popup-announce');
+}
+
+function sendAnnouncement() {
+  const text = document.getElementById('announce-input').value.trim();
+  if(!text) return;
+  wsSend({ type: 'announce', text: text });
+  document.getElementById('announce-input').value = '';
+  closePopup('popup-announce');
+}
+
+function showAnnouncement(text) {
+  const b = document.getElementById('announce-banner');
+  const t = document.getElementById('announce-text');
+  t.textContent = '📢 ' + text;
+  b.style.display = 'block';
+  // Hide after 30s
+  setTimeout(() => { b.style.display = 'none'; }, 30000);
+}
+
 // ══════════════════════════════════════════════
 // JOIN
 // ══════════════════════════════════════════════
@@ -733,6 +799,10 @@ function joinGame() {
 function handleMessage(e) {
   const data = JSON.parse(e.data);
   switch(data.type) {
+
+    case 'announce':
+      showAnnouncement(data.text);
+      break;
 
     case 'init':
       myId = data.id;

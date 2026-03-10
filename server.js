@@ -205,6 +205,15 @@ wss.on('connection', (ws) => {
           }
           break;
 
+        case 'announce':
+          if (playerData && playerData.mapId) {
+            const text = typeof data.text === 'string' ? data.text.slice(0, 200) : '';
+            if (text) {
+              broadcastToMap(playerData.mapId, { type: 'announce', id: playerId, text });
+            }
+          }
+          break;
+
         case 'ttt_join':
           if (playerData && playerData.roomId) {
             const r = meetingRooms[playerData.roomId];
