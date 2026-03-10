@@ -1595,6 +1595,18 @@ function draw(){
     ctx.fillText(obj.emoji,obj.x+obj.w/2,obj.y+obj.h/2+8);
     ctx.font='bold 9px Segoe UI'; ctx.fillStyle=near?obj.color:'#555';
     ctx.fillText(obj.label,obj.x+obj.w/2,obj.y+obj.h+12);
+    
+    // Show Room User Count
+    if (obj.action === 'room' && meetingRooms && meetingRooms[obj.roomId]) {
+      const r = meetingRooms[obj.roomId];
+      const count = r.count || 0;
+      const locked = r.locked;
+      ctx.fillStyle = count > 0 ? '#4ade80' : '#94a3b8';
+      ctx.font = 'bold 11px Segoe UI';
+      const status = `${locked ? '🔒' : '👤'} ${count}`;
+      ctx.fillText(status, obj.x + obj.w/2, obj.y - 20);
+    }
+
     if(near){ ctx.fillStyle='#fff'; ctx.font='10px Segoe UI'; ctx.fillText('[X] เปิด',obj.x+obj.w/2,obj.y-6); }
     ctx.restore();
   });
