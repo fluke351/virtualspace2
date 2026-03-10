@@ -1166,8 +1166,23 @@ function buildMap(type) {
        MAP[r][c]=T_DESK; MAP[r][c+1]=T_DESK; // Double desk
      });
 
+    // ── NEW: Central Common Area (The Void Filler) ──
+    // Large Rug in Center (Rows 14-22)
+    for(let r=14;r<22;r++) for(let c=14;c<26;c++) MAP[r][c]=T_FLOOR_RUG;
+    
+    // Dining/Meeting Tables in Center
+    [[16,16],[16,22],[19,19]].forEach(([r,c])=>{
+      MAP[r][c]=T_DESK; MAP[r][c+1]=T_DESK; // Use Desk as Table
+    });
+    
+    // Bookshelves/Storage along top (Visual only using Wall/Desk pattern)
+    for(let c=4;c<26;c+=4) MAP[1][c]=T_DESK; 
+
     // Plants (Decoration)
-    [[2,2],[2,37],[26,2],[26,37],[14,15],[4,28]].forEach(([r,c])=>MAP[r][c]=T_PLANT);
+    [[2,2],[2,37],[26,2],[26,37],[14,15],[4,28],
+     [14,14],[14,25],[21,14],[21,25], // Corners of rug
+     [18,20] // Center plant
+    ].forEach(([r,c])=>MAP[r][c]=T_PLANT);
 
     // Spotlight Stage (Top Right)
     for(let r=1;r<4;r++) for(let c=34;c<37;c++) MAP[r][c]=T_SPOT;
