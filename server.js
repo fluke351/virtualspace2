@@ -185,7 +185,8 @@ wss.on('connection', (ws) => {
 
         case 'yt_change':
           currentVideoId = data.videoId;
-          broadcast(data, ws);
+          broadcastToMap(playerData.mapId, { type: 'yt_change', videoId: currentVideoId }, ws);
+          ws.send(JSON.stringify({ type: 'yt_change', videoId: currentVideoId }));
           break;
 
         case 'spotlight':
