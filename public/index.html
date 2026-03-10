@@ -246,9 +246,106 @@ body { background:var(--bg-dark); font-family:'Inter', sans-serif; overflow:hidd
   box-shadow:0 10px 30px rgba(0,0,0,0.5); transition:transform 0.2s;
 }
 #minimized-screen:hover { transform:scale(1.05); }
+
+/* ── RESPONSIVE DESIGN ── */
+@media (max-width: 1024px) {
+  #chat-panel { width: 300px; left: 16px; bottom: 16px; }
+  .setup-box { width: 400px; padding: 32px; }
+  .setup-box h2 { font-size: 24px; }
+  .item-opt { width: 42px; height: 42px; font-size: 20px; }
+}
+
+@media (max-width: 768px) {
+  #hud { top: 12px; left: 12px; right: 12px; }
+  .hud-panel { padding: 6px 12px; }
+  .logo { font-size: 12px; }
+  #online-count { font-size: 11px; }
+  
+  #chat-panel { width: 280px; bottom: 70px; left: 12px; z-index: 60; }
+  #players-panel { top: 60px; right: 12px; min-width: 150px; }
+  
+  #hint { display: none; } /* Hide hints on tablet/mobile */
+  
+  .setup-box { padding: 24px; max-width: 95vw; }
+  .opt-grid { gap: 8px; }
+  .color-opt, .haircolor-opt, .skin-opt, .pants-opt { width: 32px; height: 32px; }
+  .item-opt { width: 36px; height: 36px; font-size: 18px; }
+  
+  /* Make room controls smaller */
+  #room-controls { padding: 8px 16px; bottom: 80px; flex-wrap: wrap; justify-content: center; width: 90%; }
+  .room-btn { padding: 6px 12px; font-size: 11px; }
+}
+
+@media (max-width: 480px) {
+  /* Mobile Layout */
+  #hud { flex-direction: column; align-items: stretch; gap: 8px; }
+  .hud-panel { justify-content: space-between; }
+  
+  #chat-panel { 
+    width: 100%; left: 0; bottom: 0; border-radius: 12px 12px 0 0; 
+    border-bottom: none; border-left: none; border-right: none;
+    height: 40%; max-height: 300px; transform: translateY(100%); transition: transform 0.3s;
+  }
+  #chat-panel.show { transform: translateY(0); }
+  
+  /* Add toggle button for chat on mobile */
+  #mobile-chat-toggle {
+    display: block !important;
+    position: absolute; bottom: 16px; left: 16px;
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--bg-panel); backdrop-filter: var(--glass);
+    border: 1px solid var(--border); color: var(--text-main);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; z-index: 55; cursor: pointer;
+  }
+  
+  #players-panel { display: none; } /* Hide player list on mobile initially */
+  
+  .setup-box { width: 100%; height: 100%; border-radius: 0; overflow-y: auto; padding: 20px; }
+  .setup-box h2 { margin-top: 20px; }
+  
+  /* Touch Controls */
+  #touch-controls {
+    display: flex !important;
+    position: absolute; bottom: 20px; right: 20px;
+    width: 150px; height: 150px; z-index: 50;
+  }
+  .dpad-btn {
+    position: absolute; width: 48px; height: 48px;
+    background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center;
+    font-size: 20px; touch-action: manipulation;
+  }
+  .dpad-btn:active { background: rgba(255, 255, 255, 0.3); }
+  .d-up { top: 0; left: 50%; transform: translateX(-50%); }
+  .d-down { bottom: 0; left: 50%; transform: translateX(-50%); }
+  .d-left { left: 0; top: 50%; transform: translateY(-50%); }
+  .d-right { right: 0; top: 50%; transform: translateY(-50%); }
+  
+  #action-btn {
+    display: flex !important;
+    position: absolute; bottom: 40px; right: 190px;
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--primary); color: #0f172a;
+    align-items: center; justify-content: center;
+    font-weight: bold; font-size: 14px; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4);
+    z-index: 50; touch-action: manipulation;
+  }
+  #action-btn:active { transform: scale(0.95); }
+}
 </style>
 </head>
 <body>
+
+<!-- Mobile Controls (Hidden by default) -->
+<div id="mobile-chat-toggle" style="display:none;" onclick="toggleMobileChat()">💬</div>
+<div id="touch-controls" style="display:none;">
+  <div class="dpad-btn d-up" ontouchstart="handleTouch('w', true)" ontouchend="handleTouch('w', false)">▲</div>
+  <div class="dpad-btn d-down" ontouchstart="handleTouch('s', true)" ontouchend="handleTouch('s', false)">▼</div>
+  <div class="dpad-btn d-left" ontouchstart="handleTouch('a', true)" ontouchend="handleTouch('a', false)">◀</div>
+  <div class="dpad-btn d-right" ontouchstart="handleTouch('d', true)" ontouchend="handleTouch('d', false)">▶</div>
+</div>
+<div id="action-btn" style="display:none;" onclick="tryInteract()">X</div>
 
 <!-- SETUP -->
 <div id="setup-screen">
