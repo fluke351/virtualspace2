@@ -13,8 +13,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Game state
 let players = {};
-let chatHistory = [];
-let wbStrokes = [];
+// Store data per map/room
+let mapsData = {};
+
+function getMapData(id) {
+  if (!mapsData[id]) mapsData[id] = { chat: [], wb: [] };
+  return mapsData[id];
+}
+
 let currentVideoId = null;
 let nextPlayerId = 1;
 
@@ -37,9 +43,18 @@ let meetingRooms = {
 };
 
 // WebSocket connection handler
+const INTERVAL = 30000;
+
+function heartbeat() {
+  this.isAlive = true;
+}
+
 wss.on('connection', (ws) => {
   let playerId = null;
   let playerData = null;
+
+  ws.isAlive = true;
+  ws.on('pong', heartbeat);
 
   ws.on('message', (message) => {
     try {
@@ -76,14 +91,17 @@ wss.on('connection', (ws) => {
             if (p.mapId === mapId) mapPlayers[id] = p;
           });
 
+          // Get Map Data
+          const mData = getMapData(mapId);
+
           // Send init to new player with all existing data
           ws.send(
             JSON.stringify({
               type: 'init',
               id: playerId,
               players: mapPlayers,
-              chatHistory: chatHistory,
-              wbStrokes: wbStrokes,
+              chatHistory: mData.chat,
+              wbStrokes: mData.wb,
               currentVideoId: currentVideoId,
               meetingRooms: getRoomStatus(),
             })
@@ -118,22 +136,51 @@ wss.on('connection', (ws) => {
               type: data.msgType || 'normal',
               msgType: data.msgType || 'normal', // backwards compatibility
             };
-            chatHistory.push(msg);
-            if (chatHistory.length > 50) chatHistory.shift();
-            broadcast({ type: 'chat', msg: msg }, ws);
+            const md = getMapData(playerData.mapId);
+            md.chat.push(msg);
+            if (md.chat.length > 50) md.chat.shift();
+
+            // Broadcast only to current map
+            broadcastToMap(playerData.mapId, { type: 'chat', msg: msg }, ws);
+            // Send back to sender so they see their own message
+            ws.send(JSON.stringify({ type: 'chat', msg: msg }));
           }
           break;
 
         case 'wb_stroke':
-          if (data.stroke) {
-            wbStrokes.push(data.stroke);
-            broadcast(data, ws);
+          if (data.stroke && playerData) {
+            const md = getMapData(playerData.mapId);
+            md.wb.push(data.stroke);
+            broadcastToMap(playerData.mapId, data, ws);
+            // Send back to sender? No, client draws locally usually. 
+            // Actually client might rely on echo if not implemented optimistically.
+            // Looking at client code: drawStroke is called on 'wb_stroke'. 
+            // Client usually draws immediately? No, client code doesn't show optimistic drawing for `wb_stroke` send.
+            // Let's check client code later. For now, broadcastToMap excludes sender by default in my implementation below?
+            // Wait, broadcastToMap implementation:
+            // if (senderWs === null || client !== senderWs)
+            // So sender doesn't get it.
+            // If client doesn't draw locally, they won't see it.
+            // I should send it back to sender too or let client handle it.
+            // Let's assume client needs it back OR I change broadcastToMap.
+            // Standard: Client draws immediately, sends to server. Server broadcasts to others.
+            // If I look at `index.html`, `drawStroke` is only called on `ws.onmessage`.
+            // There is no `mousedown`/`mousemove` handler visible in the snippets I read that calls `drawStroke` directly for local drawing.
+            // Wait, I missed reading the WB logic in client.
+            // To be safe, I will send it to sender too or Use `broadcast` which sends to all?
+            // `broadcastToMap` excludes sender.
+            // I will manually send to sender.
+            ws.send(JSON.stringify(data));
           }
           break;
 
         case 'wb_clear':
-          wbStrokes = [];
-          broadcast({ type: 'wb_clear' }, ws);
+          if (playerData) {
+            const md = getMapData(playerData.mapId);
+            md.wb = [];
+            broadcastToMap(playerData.mapId, { type: 'wb_clear' }, ws);
+            ws.send(JSON.stringify({ type: 'wb_clear' }));
+          }
           break;
 
         case 'yt_change':
@@ -325,11 +372,17 @@ wss.on('connection', (ws) => {
               Object.entries(players).forEach(([id, p]) => {
                 if (p.mapId === rId && id !== playerId) mapPlayers[id] = p;
               });
+
+              // Get Room Data
+              const rData = getMapData(rId);
+
               ws.send(JSON.stringify({
                 type: 'map_changed',
                 mapId: rId,
                 players: mapPlayers,
-                x: 20 * 32, y: 14 * 32
+                x: 20 * 32, y: 18 * 32, // Spawn below the table
+                chatHistory: rData.chat,
+                wbStrokes: rData.wb
               }));
 
               ws.send(JSON.stringify({ type: 'share_state', sharerId: room.screenSharer }));
@@ -388,11 +441,17 @@ wss.on('connection', (ws) => {
             Object.entries(players).forEach(([id, p]) => {
               if (p.mapId === 'office' && id !== playerId) mapPlayers[id] = p;
             });
+
+            // Get office data
+            const officeData = getMapData('office');
+
             ws.send(JSON.stringify({
               type: 'map_changed',
               mapId: 'office',
               players: mapPlayers,
-              x: playerData.x, y: playerData.y
+              x: playerData.x, y: playerData.y,
+              chatHistory: officeData.chat,
+              wbStrokes: officeData.wb
             }));
 
             broadcastRoomUpdate();
@@ -444,11 +503,16 @@ wss.on('connection', (ws) => {
                 if (p.mapId === newMapId && id !== playerId) mapPlayers[id] = p;
               });
 
+              // Get map data
+              const mData = getMapData(newMapId);
+
               // Send new map data to player
               ws.send(JSON.stringify({
                 type: 'map_changed',
                 mapId: newMapId,
-                players: mapPlayers
+                players: mapPlayers,
+                chatHistory: mData.chat,
+                wbStrokes: mData.wb
               }));
 
               // Join new map
@@ -464,33 +528,54 @@ wss.on('connection', (ws) => {
 
   ws.on('close', () => {
     if (playerId && players[playerId]) {
-      if (playerData.roomId) {
-        const r = meetingRooms[playerData.roomId];
-        if (r) {
-          if (r.screenSharer === playerId) {
-            r.screenSharer = null;
-            broadcastToMap(playerData.roomId, { type: 'share_stopped' });
-          }
-          if (r.ttt && r.ttt.xPlayerId === playerId) r.ttt.xPlayerId = null;
-          if (r.ttt && r.ttt.oPlayerId === playerId) r.ttt.oPlayerId = null;
-          r.users = r.users.filter(id => id !== playerId);
-          if (r.users.length === 0) {
-            r.password = '';
-            r.screenSharer = null;
-            r.ttt = games.createTttState();
-            r.poll = null;
-          }
-          broadcastToMap(playerData.roomId, { type: 'ttt_state', state: r.ttt });
-          broadcastToMap(playerData.roomId, { type: 'poll_state', poll: r.poll, counts: r.poll ? games.pollResults(r.poll) : null });
-        }
-        broadcastRoomUpdate();
-      }
-      const mId = playerData.mapId;
-      delete players[playerId];
-      broadcastToMap(mId, { type: 'player_leave', id: playerId });
+      handleDisconnect(playerId, playerData);
     }
   });
 });
+
+// Heartbeat interval to clean up dead connections
+const interval = setInterval(function ping() {
+  wss.clients.forEach(function each(ws) {
+    if (ws.isAlive === false) {
+      return ws.terminate();
+    }
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, INTERVAL);
+
+wss.on('close', function close() {
+  clearInterval(interval);
+});
+
+function handleDisconnect(playerId, playerData) {
+  if (!playerId || !playerData) return;
+
+  if (playerData.roomId) {
+    const r = meetingRooms[playerData.roomId];
+    if (r) {
+      if (r.screenSharer === playerId) {
+        r.screenSharer = null;
+        broadcastToMap(playerData.roomId, { type: 'share_stopped' });
+      }
+      if (r.ttt && r.ttt.xPlayerId === playerId) r.ttt.xPlayerId = null;
+      if (r.ttt && r.ttt.oPlayerId === playerId) r.ttt.oPlayerId = null;
+      r.users = r.users.filter(id => id !== playerId);
+      if (r.users.length === 0) {
+        r.password = '';
+        r.screenSharer = null;
+        r.ttt = games.createTttState();
+        r.poll = null;
+      }
+      broadcastToMap(playerData.roomId, { type: 'ttt_state', state: r.ttt });
+      broadcastToMap(playerData.roomId, { type: 'poll_state', poll: r.poll, counts: r.poll ? games.pollResults(r.poll) : null });
+    }
+    broadcastRoomUpdate();
+  }
+  const mId = playerData.mapId;
+  delete players[playerId];
+  broadcastToMap(mId, { type: 'player_leave', id: playerId });
+}
 
 function getRoomStatus() {
   const status = {};

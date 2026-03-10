@@ -980,6 +980,18 @@ function handleMessage(e) {
         otherPlayers[id].targetY = p.y;
       });
       updatePlayerList();
+
+      // Clear and Load Chat
+      document.getElementById('chat-msgs').innerHTML = '';
+      if (data.chatHistory) {
+        data.chatHistory.forEach(m => addChatEl(m.name, m.text, m.type || m.msgType, m.color));
+      }
+
+      // Clear and Load Whiteboard
+      clearWBLocal();
+      if (data.wbStrokes) {
+        data.wbStrokes.forEach(s => drawStroke(s));
+      }
       break;
 
     case 'room_update':
@@ -1220,7 +1232,9 @@ const OBJECTS_OFFICE = [
   {id:'spot',x:35*TILE,y:2*TILE, w:1*TILE,h:1*TILE,label:'Spotlight', emoji:'🎤',color:'#fbbf24',action:'spotlight'},
   {id:'room1', x:29*TILE, y:6*TILE, w:1*TILE, h:2*TILE, label:'Room 1', emoji:'🚪', color:'#f472b6', action:'room', roomId:'room1'},
   {id:'room2', x:29*TILE, y:12*TILE, w:1*TILE, h:2*TILE, label:'Room 2', emoji:'🚪', color:'#f472b6', action:'room', roomId:'room2'},
-  {id:'room3', x:29*TILE, y:20*TILE, w:1*TILE, h:2*TILE, label:'Room 3', emoji:'🚪', color:'#f472b6', action:'room', roomId:'room3'},
+  {id:'room3', x:29*TILE, y:18*TILE, w:1*TILE, h:2*TILE, label:'Room 3', emoji:'🚪', color:'#f472b6', action:'room', roomId:'room3'},
+  {id:'room4', x:29*TILE, y:24*TILE, w:1*TILE, h:2*TILE, label:'Room 4', emoji:'🚪', color:'#f472b6', action:'room', roomId:'room4'},
+  {id:'to_garden', x:4*TILE, y:2*TILE, w:2*TILE, h:2*TILE, label:'Relax Zone', emoji:'🌿', color:'#4ade80', action:'garden_portal'},
 ];
 
 const OBJECTS_GARDEN = [
@@ -1228,6 +1242,7 @@ const OBJECTS_GARDEN = [
   {id:'pond',x:4*TILE, y:16*TILE,w:12*TILE,h:10*TILE,label:'Fishing',emoji:'🎣',color:'#0ea5e9',action:'fish'},
   {id:'zen',x:24*TILE, y:2*TILE,w:12*TILE,h:8*TILE,label:'Meditate',emoji:'🧘',color:'#fde68a',action:'meditate'},
   {id:'coffee',x:19*TILE, y:10*TILE,w:2*TILE,h:2*TILE,label:'Coffee',emoji:'☕',color:'#78350f',action:'coffee'},
+  {id:'to_office', x:36*TILE, y:12*TILE, w:2*TILE, h:2*TILE, label:'Back to Office', emoji:'🏢', color:'#38bdf8', action:'office_portal'},
 ];
 
 let pets = [
@@ -1793,7 +1808,7 @@ function draw(){
 
   Object.entries(otherPlayers).forEach(([id,p])=>{
     const dist=Math.hypot(player.x-p.x,player.y-p.y);
-    let vol=Math.max(0,1-dist/(TILE*5));
+    let vol=Math.max(0,1-dist/(TILE*10));
     
     const pR=Math.floor(p.y/TILE), pC=Math.floor(p.x/TILE);
     const pInPriv=(pR>=6&&pR<13&&pC>=16&&pC<22);
@@ -1970,6 +1985,8 @@ function tryInteract(){
       else if(obj.action==='spotlight') showToast('📢 เดินไปที่กระเบื้องสีเหลืองมุมขวาบน!');
       else if(obj.action==='room') openRoomPopup(obj.roomId);
       else if(obj.action==='fun') openFunPopup();
+      else if(obj.action==='garden_portal') changeMap('garden');
+      else if(obj.action==='office_portal') changeMap('office');
       else if(obj.action==='fish') {
         isFishing = true;
         fishTimer = 0;
