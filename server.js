@@ -54,7 +54,9 @@ wss.on('connection', (ws) => {
           playerData = {
             id: playerId,
             name: data.name,
-            color: data.color,
+            color: data.color, // Shirt color
+            pants: data.pants || '#334155',
+            skin: data.skin || '#ffdbac',
             accessory: data.accessory || 'none',
             hairstyle: data.hairstyle || 'none',
             hairColor: data.hairColor || '#2c2c2c',
@@ -526,7 +528,7 @@ function broadcast(data, senderWs = null) {
 }
 
 // Start server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3805;
 server.listen(PORT, () => {
   console.log(`🎮 Virtual Space Server running on http://localhost:${PORT}`);
 });
