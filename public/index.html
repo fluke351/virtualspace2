@@ -1191,34 +1191,76 @@ function buildMap(type) {
     MAP[20][5]=T_COFFEE;
 
   } else if (type === 'garden') {
-    // ── GARDEN LAYOUT (RELAX ZONE) ──
+    // ── GARDEN LAYOUT (RELAX ZONE) - REDESIGNED ──
+    // Base: Grass
     for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) MAP[r][c]=T_FLOOR_GRASS;
     
-    // Large Pond (Fishing)
-    for(let r=16;r<26;r++) for(let c=4;c<16;c++) MAP[r][c]=T_WATER;
-    // Small Island
-    MAP[20][10]=T_FLOOR_GRASS; MAP[21][10]=T_FLOOR_GRASS;
-    // Bridge (Wood)
-    for(let r=20;r<22;r++) for(let c=14;c<18;c++) MAP[r][c]=T_FLOOR_WOOD;
+    // Helper for organic shapes
+    const drawBlob = (cr, cc, rad, tile) => {
+        for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) {
+            if (Math.hypot(r-cr, c-cc) < rad + (Math.random()*0.5 - 0.25)) MAP[r][c] = tile;
+        }
+    };
 
-    // Zen Garden (Meditation)
-    for(let r=2;r<10;r++) for(let c=24;c<36;c++) MAP[r][c]=T_SAND;
-    // Zen Rocks
-    MAP[4][28]=T_STONE; MAP[7][32]=T_STONE; MAP[5][26]=T_STONE;
+    // 1. Water Features (Natural Pond)
+    drawBlob(20, 10, 7, T_WATER); // Main body left
+    drawBlob(22, 16, 5, T_WATER); // Extension right
+    drawBlob(18, 6, 4, T_WATER);  // Inlet top-left
 
-    // Paths (Concrete)
-    for(let r=12;r<14;r++) for(let c=0;c<COLS;c++) MAP[r][c]=T_FLOOR_CONC;
-    for(let c=18;c<22;c++) for(let r=0;r<ROWS;r++) MAP[r][c]=T_FLOOR_CONC;
+    // 2. Island (Grass)
+    drawBlob(20, 10, 2.5, T_FLOOR_GRASS);
+
+    // 3. Wooden Deck (Social Area) - Top Left
+    for(let r=6;r<12;r++) for(let c=6;c<14;c++) MAP[r][c]=T_FLOOR_WOOD;
+    // Soften corners
+    MAP[6][6]=T_FLOOR_GRASS; MAP[6][13]=T_FLOOR_GRASS; 
+    MAP[11][6]=T_FLOOR_GRASS; MAP[11][13]=T_FLOOR_GRASS;
+
+    // 4. Zen Garden (Sand) - Top Right
+    for(let r=4;r<12;r++) for(let c=26;c<36;c++) MAP[r][c]=T_SAND;
+    // Zen Stones
+    [[5,28],[8,33],[10,27],[6,34]].forEach(([r,c]) => MAP[r][c]=T_STONE);
+
+    // 5. Winding Paths (Concrete/Stone)
+    // Path from Deck to Zen
+    for(let c=14;c<26;c++) {
+        let r = 9 + Math.floor(Math.sin(c/2)*1.5); 
+        MAP[r][c] = T_FLOOR_CONC;
+        MAP[r+1][c] = T_FLOOR_CONC;
+    }
+    // Path from Deck to Pond
+    for(let r=12;r<20;r++) {
+        let c = 10 + Math.floor(Math.cos(r/3)); 
+        if(MAP[r][c]!==T_FLOOR_WOOD && MAP[r][c]!==T_WATER) MAP[r][c] = T_FLOOR_CONC;
+    }
+
+    // 6. Bridges (Wood)
+    // Connect Deck (Row 11) to Island (Row 20)
+    for(let r=11; r<=20; r++) {
+        MAP[r][10] = T_FLOOR_WOOD;
+        MAP[r][11] = T_FLOOR_WOOD; // Wider bridge
+    }
+    // Island to Right Shore
+    for(let c=13;c<17;c++) MAP[20][c]=T_FLOOR_WOOD;
     
-    // Coffee Cart Area
-    for(let r=10;r<12;r++) for(let c=19;c<21;c++) MAP[r][c]=T_COFFEE;
-    
-    // Walls
-    for(let c=0;c<COLS;c++){MAP[0][c]=T_WALL_CONC;MAP[ROWS-1][c]=T_WALL_CONC;}
-    for(let r=0;r<ROWS;r++){MAP[r][0]=T_WALL_CONC;MAP[r][COLS-1]=T_WALL_CONC;}
+    // Fishing Platform Extension (Left side of bridge)
+    MAP[20][13]=T_FLOOR_WOOD; MAP[20][12]=T_FLOOR_WOOD; MAP[20][11]=T_FLOOR_WOOD;
+    // Ensure clear path from island
+    MAP[20][10]=T_FLOOR_WOOD; 
 
-    // Random Plants
-    for(let i=0;i<40;i++) {
+    // 7. Coffee Cart on Deck
+    MAP[8][9]=T_COFFEE;
+
+    // 8. Outer Walls (Hedges)
+    for(let c=0;c<COLS;c++){MAP[0][c]=T_PLANT;MAP[ROWS-1][c]=T_PLANT;}
+    for(let r=0;r<ROWS;r++){MAP[r][0]=T_PLANT;MAP[r][COLS-1]=T_PLANT;}
+
+    // Entrance/Exit Area (Top Center)
+    for(let r=0;r<3;r++) for(let c=18;c<22;c++) MAP[r][c]=T_FLOOR_CONC;
+    MAP[0][19]=T_FLOOR_CONC; MAP[0][20]=T_FLOOR_CONC; // Clear wall for exit
+
+    // 9. Random Vegetation (More dense)
+    for(let i=0;i<80;i++) {
       let r=Math.floor(Math.random()*(ROWS-2))+1;
       let c=Math.floor(Math.random()*(COLS-2))+1;
       if(MAP[r][c]===T_FLOOR_GRASS) MAP[r][c]=T_PLANT;
@@ -1230,8 +1272,15 @@ function buildMap(type) {
     // Room Interior
     for(let r=6;r<22;r++) for(let c=10;c<30;c++) MAP[r][c]=T_FLOOR_WOOD;
     
-    // Big Conference Table
-    for(let r=12;r<16;r++) for(let c=14;c<26;c++) MAP[r][c]=T_DESK;
+    // 6 Tables with gap (Top 3, Bottom 3)
+    // Top Row
+    [[12,14],[12,18],[12,22]].forEach(([r,c])=>{
+       MAP[r][c]=T_DESK; MAP[r][c+1]=T_DESK; 
+    });
+    // Bottom Row
+    [[14,14],[14,18],[14,22]].forEach(([r,c])=>{
+       MAP[r][c]=T_DESK; MAP[r][c+1]=T_DESK;
+    });
     
     // Plants
     MAP[6][10]=T_PLANT; MAP[6][29]=T_PLANT; MAP[21][10]=T_PLANT; MAP[21][29]=T_PLANT;
@@ -1253,11 +1302,11 @@ const OBJECTS_OFFICE = [
 ];
 
 const OBJECTS_GARDEN = [
-  {id:'chat',x:19*TILE, y:13*TILE,w:2*TILE,h:2*TILE,label:'Park Bench',emoji:'🪑',color:'#4ade80',action:'chat'},
-  {id:'pond',x:4*TILE, y:16*TILE,w:12*TILE,h:10*TILE,label:'Fishing',emoji:'🎣',color:'#0ea5e9',action:'fish'},
-  {id:'zen',x:24*TILE, y:2*TILE,w:12*TILE,h:8*TILE,label:'Meditate',emoji:'🧘',color:'#fde68a',action:'meditate'},
-  {id:'coffee',x:19*TILE, y:10*TILE,w:2*TILE,h:2*TILE,label:'Coffee',emoji:'☕',color:'#78350f',action:'coffee'},
-  {id:'to_office', x:36*TILE, y:12*TILE, w:2*TILE, h:2*TILE, label:'Back to Office', emoji:'🏢', color:'#38bdf8', action:'office_portal'},
+  {id:'chat',x:20*TILE, y:10*TILE,w:2*TILE,h:2*TILE,label:'Island Bench',emoji:'🪑',color:'#4ade80',action:'chat'},
+  {id:'pond',x:13*TILE, y:20*TILE,w:4*TILE,h:2*TILE,label:'Fishing Bridge',emoji:'🎣',color:'#0ea5e9',action:'fish'},
+  {id:'zen',x:30*TILE, y:6*TILE,w:4*TILE,h:4*TILE,label:'Meditate',emoji:'🧘',color:'#fde68a',action:'meditate'},
+  {id:'coffee',x:8*TILE, y:9*TILE,w:2*TILE,h:2*TILE,label:'Coffee',emoji:'☕',color:'#78350f',action:'coffee'},
+  {id:'to_office', x:19*TILE, y:0*TILE, w:2*TILE, h:2*TILE, label:'Back to Office', emoji:'🏢', color:'#38bdf8', action:'office_portal'},
 ];
 
 let pets = [
@@ -1276,6 +1325,7 @@ function updateObjects() {
   if (currentMapType === 'office') {
     OBJECTS = OBJECTS_OFFICE;
     pets = [];
+    pondFish = [];
   } else if (currentMapType === 'garden') {
     OBJECTS = OBJECTS_GARDEN;
     // Reset pets position if needed
@@ -1283,9 +1333,11 @@ function updateObjects() {
       {id:'cat1', x:28*TILE, y:6*TILE, type:'cat', color:'#f59e0b', frame:0, dir:1, targetX:28*TILE, targetY:6*TILE, action:'pet', anim:0},
       {id:'dog1', x:10*TILE, y:14*TILE, type:'dog', color:'#a8a29e', frame:0, dir:3, targetX:10*TILE, targetY:14*TILE, action:'pet', anim:0}
     ];
+    initPondFish();
   } else if (currentMapType.startsWith('room')) {
     OBJECTS = OBJECTS_ROOM;
     pets = [];
+    pondFish = [];
   }
 }
 
@@ -1298,7 +1350,7 @@ function changeMap(type) {
   wsSend({ type: 'change_map', mapId: type, x: 20*TILE, y: 14*TILE });
 }
 
-const player={x:20*TILE,y:14*TILE,w:24,h:24,speed:3.5,frame:0,dir:2,anim:0};
+const player={x:20*TILE,y:14*TILE,w:24,h:24,speed:3.5,frame:0,dir:2,anim:0,fishCount:0,isSitting:false};
 const cam={x:0,y:0};
 const keys={};
 let spotlightActive=false, privateZone=false, dbTick=0;
@@ -1306,12 +1358,26 @@ let isFishing = false;
 let isMeditating = false;
 let hasCoffee = false;
 let fishTimer = 0;
+let pondFish = [];
+
+function initPondFish() {
+  pondFish = [];
+  for(let i=0; i<8; i++) {
+    pondFish.push({
+      x: (14 + Math.random()*8) * TILE,
+      y: (18 + Math.random()*6) * TILE,
+      dx: (Math.random()-0.5)*0.5,
+      dy: (Math.random()-0.5)*0.5,
+      type: Math.random() > 0.7 ? 'gold' : 'blue'
+    });
+  }
+}
 
 function isSolid(wx,wy){
   const c=Math.floor(wx/TILE),r=Math.floor(wy/TILE);
   if(r<0||r>=ROWS||c<0||c>=COLS) return true;
   const t=MAP[r][c];
-  return t===T_WALL_CONC || t===T_WALL_GLASS || t===T_DESK || t===T_PLANT;
+  return t===T_WALL_CONC || t===T_WALL_GLASS || t===T_DESK || t===T_PLANT || t===T_WATER || t===T_STONE;
 }
 function move(e,dx,dy){
   const m=6,hw=e.w/2-m,hh=e.h/2-m;
@@ -1349,6 +1415,29 @@ function drawPattern(ctx, type, x, y, w, h) {
     ctx.moveTo(x, y + offset);
     ctx.lineTo(x+w, y + offset);
     ctx.stroke();
+
+    // Draw Fish in water
+    if (currentMapType === 'garden') {
+        pondFish.forEach(f => {
+            // Check if fish is within this tile (simple culling)
+            if (f.x >= x && f.x < x+w && f.y >= y && f.y < y+h) {
+                ctx.fillStyle = '#9ca3af'; // Grey fish
+                const fx = f.x;
+                const fy = f.y + Math.sin(Date.now()/200)*2;
+                // Fish shape
+                ctx.beginPath();
+                ctx.ellipse(fx, fy, 4, 2, f.dx > 0 ? 0 : Math.PI, 0, Math.PI*2);
+                ctx.fill();
+                // Tail
+                ctx.beginPath();
+                ctx.moveTo(fx + (f.dx > 0 ? -4 : 4), fy);
+                ctx.lineTo(fx + (f.dx > 0 ? -6 : 6), fy - 2);
+                ctx.lineTo(fx + (f.dx > 0 ? -6 : 6), fy + 2);
+                ctx.fill();
+            }
+        });
+    }
+
   } else if (type === 'sand') {
     ctx.fillStyle = '#fde68a'; ctx.fillRect(x, y, w, h);
     // Raked pattern (Zen)
@@ -1358,14 +1447,22 @@ function drawPattern(ctx, type, x, y, w, h) {
     ctx.arc(x+w/2, y+h/2, w/3, 0, Math.PI*2);
     ctx.stroke();
   } else if (type === 'stone') {
-    ctx.fillStyle = '#57534e'; 
-    ctx.beginPath(); 
-    ctx.ellipse(x+w/2, y+h/2+4, w/2-4, h/3, 0, 0, Math.PI*2); 
-    ctx.fill(); // Stone base
-    ctx.fillStyle = '#78716c'; 
-    ctx.beginPath(); 
-    ctx.ellipse(x+w/2, y+h/2, w/2-4, h/3, 0, 0, Math.PI*2); 
-    ctx.fill(); // Stone top
+    // 16-bit Rock
+    // Shadow base
+    drawPixelRect(ctx, x+4, y+h-4, w-8, 2, 'rgba(0,0,0,0.3)');
+    
+    // Main Body
+    drawPixelRect(ctx, x+4, y+12, w-8, h-14, '#78716c'); // Grey
+    drawPixelRect(ctx, x+6, y+8, w-12, 4, '#78716c'); // Top rounded
+    
+    // Highlights
+    drawPixelRect(ctx, x+8, y+10, 4, 4, '#a8a29e'); // Light grey
+    drawPixelRect(ctx, x+6, y+14, 2, 6, '#a8a29e'); // Edge light
+
+    // Cracks/Texture
+    drawPixelRect(ctx, x+14, y+18, 6, 2, '#57534e'); // Darker crack
+    drawPixelRect(ctx, x+18, y+14, 2, 2, '#57534e'); // Dot
+
   } else if (type === 'coffee') {
     ctx.fillStyle = '#78350f'; ctx.fillRect(x, y, w, h); // Counter
     ctx.fillStyle = '#451a03'; ctx.fillRect(x, y, w, 4); // Top edge
@@ -1392,8 +1489,33 @@ function drawPattern(ctx, type, x, y, w, h) {
     ctx.fillStyle = '#000'; ctx.globalAlpha=0.3; ctx.fillRect(x+4, y+h-4, w-8, 4); ctx.globalAlpha=1; // Shadow
     ctx.fillStyle = '#1e293b'; ctx.fillRect(x+8, y+8, 12, 8); // Laptop
   } else if (type === 'plant') {
-    ctx.fillStyle = '#166534'; ctx.beginPath(); ctx.arc(x+w/2, y+h/2, 10, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(x+w/2-3, y+h/2-3, 4, 0, Math.PI*2); ctx.fill();
+    // 16-bit Tree (Oak-ish)
+    // Shadow
+    drawPixelRect(ctx, x+8, y+28, 16, 4, 'rgba(0,0,0,0.3)');
+
+    // Trunk
+    drawPixelRect(ctx, x+14, y+22, 4, 8, '#78350f'); // Dark Wood
+    drawPixelRect(ctx, x+12, y+28, 8, 2, '#78350f'); // Base
+    
+    // Leaves - Layer 1 (Dark Shadow)
+    drawPixelRect(ctx, x+4, y+14, 24, 12, '#14532d'); 
+    drawPixelRect(ctx, x+2, y+16, 28, 8, '#14532d');
+
+    // Leaves - Layer 2 (Main Green)
+    drawPixelRect(ctx, x+4, y+12, 24, 10, '#16a34a');
+    drawPixelRect(ctx, x+6, y+8, 20, 16, '#16a34a');
+    drawPixelRect(ctx, x+10, y+4, 12, 6, '#16a34a');
+
+    // Leaves - Layer 3 (Highlights)
+    drawPixelRect(ctx, x+8, y+8, 6, 6, '#4ade80');
+    drawPixelRect(ctx, x+14, y+6, 4, 4, '#4ade80');
+    drawPixelRect(ctx, x+6, y+14, 4, 4, '#4ade80');
+
+    // Fruit (Red Apple) - Random chance based on position
+    if ((x+y)%7 === 0) {
+        drawPixelRect(ctx, x+20, y+10, 4, 4, '#ef4444');
+        drawPixelRect(ctx, x+21, y+9, 1, 2, '#fca5a5'); // Shine
+    }
   }
 }
 
@@ -1482,13 +1604,14 @@ function drawPixelPet(ctx, x, y, type, color, frame, dir, isHappy) {
   }
 }
 
-function drawStardewChar(ctx, x, y, frame, dir, skin, shirt, pants, hair, hairColor, acc, isMicOn) {
+function drawStardewChar(ctx, x, y, frame, dir, skin, shirt, pants, hair, hairColor, acc, isMicOn, isSitting) {
   const s = 2.5; // Scale factor
-  const bob = [0, -1, 0, 1][Math.floor(frame) % 4] * s;
+  const bob = isSitting ? 0 : [0, -1, 0, 1][Math.floor(frame) % 4] * s;
   
   // Center adjustments
   const cx = x - (6 * s); // Base width is ~12px
-  const cy = y - (24 * s); // Base height is ~30px
+  let cy = y - (24 * s); // Base height is ~30px
+  if (isSitting) cy += 3 * s; // Sit lower
 
   // Shadow
   ctx.fillStyle = 'rgba(0,0,0,0.3)';
@@ -1596,7 +1719,7 @@ function drawStardewChar(ctx, x, y, frame, dir, skin, shirt, pants, hair, hairCo
   }
 }
 
-function drawChar(x,y,color,name,frame,dir,isMe,vol=0,acc='none',hair='none',gender='male',hairColor='#2c2c2c',isMicOn=true, skin='#ffdbac', pants='#334155'){
+function drawChar(x,y,color,name,frame,dir,isMe,vol=0,acc='none',hair='none',gender='male',hairColor='#2c2c2c',isMicOn=true, skin='#ffdbac', pants='#334155', fishCount=0, isSitting=false){
   // Fallback for missing new props (during transition)
   if (!skin) skin = '#ffdbac';
   if (!pants) pants = '#334155';
@@ -1610,15 +1733,22 @@ function drawChar(x,y,color,name,frame,dir,isMe,vol=0,acc='none',hair='none',gen
   }
 
   // Use new rendering
-  drawStardewChar(ctx, x, y, frame, dir, skin, color, pants, hair, hairColor, acc, isMicOn);
+  drawStardewChar(ctx, x, y, frame, dir, skin, color, pants, hair, hairColor, acc, isMicOn, isSitting);
 
   // Name Tag
-  const bob=[0,-2,0,2][Math.floor(frame)%4];
+  const bob = isSitting ? 0 : [0,-2,0,2][Math.floor(frame)%4];
   ctx.save(); ctx.font='bold 10px Segoe UI'; ctx.textAlign='center';
   const tw=ctx.measureText(name).width;
   // Move up by 15px (from -55 to -70) to clear big hair
   ctx.fillStyle='rgba(15, 23, 42, 0.75)'; ctx.beginPath(); ctx.roundRect(x-tw/2-4,y-70+bob,tw+8,14,3); ctx.fill();
   ctx.fillStyle=isMe?'#38bdf8':color; ctx.fillText(name,x,y-59+bob);
+
+  // Show Fish Count (if any)
+  if (fishCount > 0) {
+      ctx.font = 'bold 11px Segoe UI';
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillText(`🐟 ${fishCount}`, x, y - 80 + bob);
+  }
   ctx.restore();
 }
 
@@ -1673,16 +1803,34 @@ function update(){
     if(p.bubble && Date.now() > p.bubbleExp) p.bubble = null;
   });
 
+  // Update Pond Fish
+  if (currentMapType === 'garden') {
+    pondFish.forEach(f => {
+      f.x += f.dx;
+      f.y += f.dy;
+      // Bounce off boundaries (rough)
+      if (f.x < 4*TILE || f.x > 26*TILE) f.dx *= -1;
+      if (f.y < 16*TILE || f.y > 26*TILE) f.dy *= -1;
+      // Random change
+      if (Math.random() < 0.01) {
+        f.dx = (Math.random()-0.5)*0.5;
+        f.dy = (Math.random()-0.5)*0.5;
+      }
+    });
+  }
+
   // Fishing Logic
   if (isFishing) {
     fishTimer++;
     if (fishTimer > 200 && Math.random() < 0.05) {
       isFishing = false;
       fishTimer = 0;
-      showToast('🎣 Caught a fish! (Just kidding, but nice vibe)');
+      player.fishCount = (player.fishCount || 0) + 1;
+      showToast(`🎣 Caught a fish! Total: ${player.fishCount}`);
       player.bubble = '🐟';
       player.bubbleExp = Date.now() + 2000;
       wsSend({ type: 'reaction', emoji: '🐟' });
+      wsSend({ type: 'update_status', fishCount: player.fishCount }); // Broadcast status
     }
     return; // Freeze player movement
   }
@@ -1693,6 +1841,16 @@ function update(){
       isMeditating = false;
       document.getElementById('hud').style.opacity = 1;
       showToast('🙏 Meditation finished');
+    } else {
+      return; // Freeze
+    }
+  }
+
+  // Sitting Logic
+  if (player.isSitting) {
+    if (keys['w']||keys['s']||keys['a']||keys['d']||keys['ArrowUp']||keys['ArrowDown']||keys['ArrowLeft']||keys['ArrowRight']) {
+      player.isSitting = false;
+      showToast('🧍 ยืนขึ้น');
     } else {
       return; // Freeze
     }
@@ -1864,7 +2022,7 @@ function draw(){
     // Apply volume to audio element
     if(audioElements[id]) audioElements[id].volume = vol;
 
-    drawChar(p.x,p.y,p.color,p.name,p.frame||0,p.dir||2,false,vol,p.accessory,p.hairstyle,p.gender,p.hairColor,p.isMicOn!==false, p.skin, p.pants);
+    drawChar(p.x,p.y,p.color,p.name,p.frame||0,p.dir||2,false,vol,p.accessory,p.hairstyle,p.gender,p.hairColor,p.isMicOn!==false, p.skin, p.pants, p.fishCount||0, p.isSitting||false);
     if(p.bubble&&now<p.bubbleExp) drawBubble(p.x,p.y,p.bubble);
     if(vol>0.05){
       const bx=p.x-15,by=p.y+14;
@@ -1926,7 +2084,7 @@ function draw(){
     ctx.restore();
   }
 
-  drawChar(player.x,player.y,myColor,myName+'(คุณ)',player.frame,player.dir,true,0,myAcc,myHair,myGender,myHairColor,isMicOn, mySkin, myPants);
+  drawChar(player.x,player.y,myColor,myName+'(คุณ)',player.frame,player.dir,true,0,myAcc,myHair,myGender,myHairColor,isMicOn, mySkin, myPants, player.fishCount, player.isSitting);
   if(player.bubble&&Date.now()<player.bubbleExp) drawBubble(player.x,player.y,player.bubble);
   ctx.restore();
 
@@ -1988,6 +2146,13 @@ window.addEventListener('keydown', e=>{
 window.addEventListener('keyup',e=>{ keys[e.key]=false; });
 
 function tryInteract(){
+  // Check if sitting
+  if (player.isSitting) {
+    player.isSitting = false;
+    showToast('🧍 ยืนขึ้น');
+    return;
+  }
+
   // Check pets first
   for(const p of pets){
     const dist = Math.hypot(player.x-p.x, player.y-p.y);
@@ -2029,6 +2194,17 @@ function tryInteract(){
       return;
     }
   }
+  // Check Desk (Sitting)
+  const facingX = player.x + (player.dir===1?TILE:(player.dir===3?-TILE:0));
+  const facingY = player.y + (player.dir===2?TILE:(player.dir===0?-TILE:0));
+  const r = Math.floor(facingY/TILE);
+  const c = Math.floor(facingX/TILE);
+  if (r>=0 && r<ROWS && c>=0 && c<COLS && MAP[r][c] === T_DESK) {
+     player.isSitting = true;
+     showToast('🪑 นั่งลง (กดปุ่มเดินเพื่อยืน)');
+     return;
+  }
+
   showToast('เดินเข้าไปใกล้วัตถุก่อน');
 }
 
