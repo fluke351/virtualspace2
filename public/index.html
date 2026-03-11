@@ -96,8 +96,8 @@ body { background:var(--bg-dark); font-family:'Inter', sans-serif; overflow:hidd
 #btn-fullscreen:hover { background:rgba(255,255,255,0.2); }
 
 /* ── GAME ── */
-#game-wrap { flex:1; position:relative; overflow:hidden; }
-#canvas { display:block; cursor:none; width:100%; height:100%; }
+#game-wrap { flex:1; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+#canvas { display:block; cursor:none; width:1929px; height:887px; }
 
 /* ── CHAT ── */
 #chat-panel {
@@ -1097,11 +1097,15 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const wrap = document.getElementById('game-wrap');
 
-function resize() { canvas.width = wrap.clientWidth; canvas.height = wrap.clientHeight; }
+const TARGET_CANVAS_W = 1929;
+const TARGET_CANVAS_H = 887;
+
+function resize() { canvas.width = TARGET_CANVAS_W; canvas.height = TARGET_CANVAS_H; }
 window.addEventListener('resize', resize);
 
-const TILE=32, COLS=40, ROWS=28;
-const WW=COLS*TILE, WH=ROWS*TILE;
+const TILE = 31;
+const WW = TARGET_CANVAS_W, WH = TARGET_CANVAS_H;
+const COLS = Math.ceil(WW / TILE), ROWS = Math.ceil(WH / TILE);
 
 // Map Assets
 const T_FLOOR_CONC = 0;
@@ -1272,12 +1276,9 @@ function buildMap(type) {
     // Room Interior
     for(let r=6;r<22;r++) for(let c=10;c<30;c++) MAP[r][c]=T_FLOOR_WOOD;
     
-    // 6 Tables with gap (Top 3, Bottom 3)
-    // Top Row
     [[12,14],[12,18],[12,22]].forEach(([r,c])=>{
        MAP[r][c]=T_DESK; MAP[r][c+1]=T_DESK; 
     });
-    // Bottom Row
     [[14,14],[14,18],[14,22]].forEach(([r,c])=>{
        MAP[r][c]=T_DESK; MAP[r][c+1]=T_DESK;
     });
@@ -1397,7 +1398,7 @@ function drawPattern(ctx, type, x, y, w, h) {
     ctx.fillStyle = '#4e342e';
     for(let i=0; i<w; i+=8) ctx.fillRect(x+i, y, 1, h); // Vertical planks
     ctx.fillStyle = 'rgba(0,0,0,0.1)';
-    if ((Math.floor(x/32)+Math.floor(y/32))%2===0) ctx.fillRect(x,y,w,h); // Checker pattern
+    if ((Math.floor(x/TILE)+Math.floor(y/TILE))%2===0) ctx.fillRect(x,y,w,h); // Checker pattern
   } else if (type === 'grass') {
     ctx.fillStyle = '#4ade80'; ctx.fillRect(x, y, w, h);
     ctx.fillStyle = '#22c55e';
@@ -1421,7 +1422,7 @@ function drawPattern(ctx, type, x, y, w, h) {
         pondFish.forEach(f => {
             // Check if fish is within this tile (simple culling)
             if (f.x >= x && f.x < x+w && f.y >= y && f.y < y+h) {
-                ctx.fillStyle = '#9ca3af'; // Grey fish
+                ctx.fillStyle = '#9ca3af';
                 const fx = f.x;
                 const fy = f.y + Math.sin(Date.now()/200)*2;
                 // Fish shape
@@ -1611,7 +1612,7 @@ function drawStardewChar(ctx, x, y, frame, dir, skin, shirt, pants, hair, hairCo
   // Center adjustments
   const cx = x - (6 * s); // Base width is ~12px
   let cy = y - (24 * s); // Base height is ~30px
-  if (isSitting) cy += 3 * s; // Sit lower
+  if (isSitting) cy += 3 * s;
 
   // Shadow
   ctx.fillStyle = 'rgba(0,0,0,0.3)';
@@ -1773,8 +1774,8 @@ function update(){
     if (Math.random() < 0.02) {
       const moveDir = Math.floor(Math.random() * 5); // 0-3 dir, 4 wait
       if (moveDir < 4) {
-        const dx = [0, -1, 0, 1][moveDir] * 32;
-        const dy = [-1, 0, 1, 0][moveDir] * 32;
+        const dx = [0, -1, 0, 1][moveDir] * TILE;
+        const dy = [-1, 0, 1, 0][moveDir] * TILE;
         const nx = p.x + dx;
         const ny = p.y + dy;
         // Check bounds (roughly within map)
@@ -1846,7 +1847,6 @@ function update(){
     }
   }
 
-  // Sitting Logic
   if (player.isSitting) {
     if (keys['w']||keys['s']||keys['a']||keys['d']||keys['ArrowUp']||keys['ArrowDown']||keys['ArrowLeft']||keys['ArrowRight']) {
       player.isSitting = false;
@@ -1907,6 +1907,10 @@ function update(){
 function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.save(); ctx.translate(-cam.x,-cam.y);
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, WW, WH);
+  ctx.clip();
 
   // Draw Map
   for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
@@ -2087,6 +2091,7 @@ function draw(){
   drawChar(player.x,player.y,myColor,myName+'(คุณ)',player.frame,player.dir,true,0,myAcc,myHair,myGender,myHairColor,isMicOn, mySkin, myPants, player.fishCount, player.isSitting);
   if(player.bubble&&Date.now()<player.bubbleExp) drawBubble(player.x,player.y,player.bubble);
   ctx.restore();
+  ctx.restore();
 
   // Overlays
   if(spotlightActive){
@@ -2146,7 +2151,6 @@ window.addEventListener('keydown', e=>{
 window.addEventListener('keyup',e=>{ keys[e.key]=false; });
 
 function tryInteract(){
-  // Check if sitting
   if (player.isSitting) {
     player.isSitting = false;
     showToast('🧍 ยืนขึ้น');
@@ -2194,7 +2198,6 @@ function tryInteract(){
       return;
     }
   }
-  // Check Desk (Sitting)
   const facingX = player.x + (player.dir===1?TILE:(player.dir===3?-TILE:0));
   const facingY = player.y + (player.dir===2?TILE:(player.dir===0?-TILE:0));
   const r = Math.floor(facingY/TILE);
